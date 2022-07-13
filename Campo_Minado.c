@@ -10,6 +10,16 @@ typedef struct{
     char ** matriz;
 }campo;
 
+void matriz_esta_aberta(campo * c)
+{
+    for (int i=0; i<10; i++)
+    {
+        for(int j=0; j<20; j++)
+        {
+            c[2].matriz[i][j] = '0';
+        }
+    }
+}
 
 // Essa função cria a matriz e faz a alocação dinâmica dos ca6mpos
 void cria_campo(campo * c){
@@ -88,7 +98,7 @@ void print_campo(campo * c){
         printf("%d |", cont_linha);
         for (int a = 0; a < 20; a++)
         {
-            printf(" %c |", c[0].matriz[i][a]);
+            printf(" %c |", c[2].matriz[i][a]);
         }
         printf("\n");
         printf("  ---------------------------------------------------------------------------------\n");
@@ -98,23 +108,36 @@ void print_campo(campo * c){
 //----------------------------fim da função----------------------------------
 
 
+
+int coordenada_valida(int coordenada1, int coordenada2)
+{
+    if (coordenada1 >= 0 && coordenada1<=10 && coordenada2 >= 0 && coordenada2 <=20)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 void modo_casual(campo * c)
 {
-    int opcao;
+    int coordenada1, coordenada2;
     printf("\n\n");
     printf("\t\t\t\t    CAMPO MINADO\n\n");
     print_campo(c);
     printf("\nInforme uma coordenada: ");
-    scanf("%i", &opcao);
-    if (opcao == 1)
+    scanf("%i %i", &coordenada1, &coordenada2);
+    if (coordenada_valida(coordenada1, coordenada2) == 1)
     {
-        // usuário escolhe a posição 
+        printf("verdadeiro");
     }
     else
     {
-        printf("\nOpção inválida! (%i)\n\n", opcao);
-        modo_casual(c);
+        printf("falso");
     }
+    modo_casual(c);
 }
 
 void menu(campo * c)
@@ -147,7 +170,7 @@ void menu(campo * c)
 int main (){
 
     campo *c;
-    c = malloc (sizeof(campo)*2);
+    c = malloc (sizeof(campo)*4);
     cria_campo(c);
     preencher_campo(c);
     menu(c);
