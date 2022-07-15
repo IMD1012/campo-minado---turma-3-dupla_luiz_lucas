@@ -10,7 +10,7 @@ typedef struct{
     char ** matriz;
 }campo;
 
-void matriz_esta_aberta(campo * c)
+void fechar_campos(campo * c)
 {
     for (int i=0; i<10; i++)
     {
@@ -25,11 +25,15 @@ void matriz_esta_aberta(campo * c)
 void cria_campo(campo * c){
     c[0].matriz = calloc(10, sizeof(char*));
     c[1].matriz = calloc(10, sizeof(char*));
+    c[2].matriz = calloc(10, sizeof(char*));
+    c[3].matriz = calloc(10, sizeof(char*));
 
     for (int l = 0; l < 10; l++)
     {
        c[0].matriz[l] = calloc(20, sizeof(char));
        c[1].matriz[l] = calloc(20, sizeof(char));
+       c[2].matriz[l] = calloc(20, sizeof(char));
+       c[3].matriz[l] = calloc(20, sizeof(char));
     }
     //Adiciona um espaço inicial em todas as posições 
     for(int linha=0; linha<10 ; linha++){
@@ -37,6 +41,8 @@ void cria_campo(campo * c){
         {
             c[0].matriz[linha][coluna] = ' ';
             c[1].matriz[linha][coluna] = ' ';
+            c[2].matriz[linha][coluna] = ' ';
+            c[3].matriz[linha][coluna] = ' ';
         }
     }
 }
@@ -121,33 +127,95 @@ int coordenada_valida(int coordenada1, int coordenada2)
     }
 }
 
-void modo_casual(campo * c)
+void opcao_invalida(int opcao)
 {
-    int coordenada1, coordenada2;
+    printf("Opção inválida! (%i)\n", opcao);
+}
+
+void calcular_tempo_jogo(float *ref_tempo_inicial, float *ref_tempo_final, float *ref_tempo_jogo)
+{
+    printf("%i\n", (int) *ref_tempo_inicial);
+    printf("%i\n", (int) *ref_tempo_final);
+    *ref_tempo_jogo = *ref_tempo_final - *ref_tempo_inicial;
+    float horas = *ref_tempo_jogo/3600;
+    float minutos = (*ref_tempo_jogo/3600 - (int) horas) *60;
+    int segundos = lround((((*ref_tempo_jogo/3600 - (int) horas) *60)-(int)minutos)*60);
+    printf("\n Seu tempo de jogo até agora foi de:\n");
+    printf("\nHoras: %i\n", (int)horas);
+    printf("Minutos: %i\n", (int)minutos);
+    printf("Segundos: %i\n", segundos);
+    
+}
+
+void modo_casual(campo * c, float *ref_tempo_inicial)
+{
+    int coordenada1, coordenada2,opcao;
     printf("\n\n");
     printf("\t\t\t\t    CAMPO MINADO\n\n");
     print_campo(c);
-    printf("\nInforme uma coordenada: ");
-    scanf("%i %i", &coordenada1, &coordenada2);
-    if (coordenada_valida(coordenada1, coordenada2) == 1)
+    printf("Escolha uma opção:\n\n 1 - Quero informar uma coordenada. \n 2 - Quero saber meu tempo de jogo. \n 3 - Desistir do jogo.");
+    scanf("\n%i", &opcao);
+    if(opcao==1)
     {
-        printf("verdadeiro");
+        printf("\nInforme uma coordenada: ");
+        scanf("%i %i", &coordenada1, &coordenada2);
+        if (coordenada_valida(coordenada1, coordenada2) == 1)
+        {
+            printf("verdadeiro");
+        }
+        else
+        {
+            printf("falso");
+        }
+    }
+    else if(opcao==2)
+    {
+        time_t tempo;
+        struct tm *infoTempo;
+        time(&tempo);
+        infoTempo=localtime(&tempo);
+        float tempo_final = infoTempo->tm_sec+(infoTempo->tm_min*60)+(infoTempo->tm_hour-3)*3600;
+        float *ref_tempo_final = &tempo_final;
+        float tempo_jogo;
+        float *ref_tempo_jogo = &tempo_jogo;
+        calcular_tempo_jogo(ref_tempo_inicial, ref_tempo_final, ref_tempo_jogo);
+    }
+    else if (opcao==3)
+    {
+        int opcao_saida=5;
+        while (opcao_saida<1 || opcao_saida>2)
+        {
+        printf("\nTem certeza que deseja sair do jogo? Todo seu progresso será apagado. Digite 1 para (Sair do Jogo) e 2 para (Voltar ao Jogo).\n\n");
+        scanf("%i", &opcao_saida);
+        if(opcao_saida == 1)
+        {
+            exit(0);
+        }
+        else if(opcao_saida == 2)
+        {
+            printf("Ok! Voltando para o mesmo ponto do jogo...");
+        }
+        else
+        {
+            opcao_invalida(opcao_saida);
+        }
+        }
     }
     else
     {
-        printf("falso");
+        opcao_invalida(opcao);
     }
-    modo_casual(c);
+    modo_casual(c,ref_tempo_inicial);
 }
 
 void menu(campo * c)
 {
     int opcao;
-    printf("Olá! Seja bem-vindo(a) ao Campo Minado.\n Por favor, escolha uma opção de 1 a 3. \n 1 - Jogar: Modo Casual\n 2 - Modo Autônomo\n 3 - Sair.\n\n");
+    printf("\nOlá! Seja bem-vindo(a) ao Campo Minado.\n\n Por favor, escolha uma opção de 1 a 3. \n 1 - Jogar: Modo Casual\n 2 - Modo Autônomo\n 3 - Sair.\n\n");
     scanf("%i", &opcao);
     if (opcao>3 || opcao<1)
     {
-        printf("\nOpção inválida! (%i)\n\n", opcao);
+        opcao_invalida(opcao);
         menu(c);
     }
     else
@@ -155,7 +223,14 @@ void menu(campo * c)
         if (opcao == 1)
         {
             printf("\nVocê selecionou a opção (%i). Iniciando Modo Casual... \n\n", opcao);
-            modo_casual(c);
+            time_t tempo;
+            struct tm *infoTempo;
+            time(&tempo);
+            infoTempo=localtime(&tempo);
+            float tempo_inicial = infoTempo->tm_sec+(infoTempo->tm_min*60)+(infoTempo->tm_hour-3)*3600;
+            float *ref_tempo_inicial = &tempo_inicial;
+            modo_casual(c,ref_tempo_inicial);
+            
         }
         else if(opcao == 2)
         {
@@ -164,15 +239,19 @@ void menu(campo * c)
         else if(opcao == 3)
         {
             printf("\nVocê selecionou a opção (%i). Encerrando programa... \n\n", opcao);
+            exit(0);
         }
     }
 }
+
+
 int main (){
 
     campo *c;
     c = malloc (sizeof(campo)*4);
     cria_campo(c);
     preencher_campo(c);
+    fechar_campos(c);
     menu(c);
     return 0;
 }
