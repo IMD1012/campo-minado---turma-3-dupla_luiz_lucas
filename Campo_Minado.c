@@ -141,9 +141,30 @@ void calcular_tempo_jogo(float *ref_tempo_inicial, float *ref_tempo_final, float
     float minutos = (*ref_tempo_jogo/3600 - (int) horas) *60;
     int segundos = lround((((*ref_tempo_jogo/3600 - (int) horas) *60)-(int)minutos)*60);
     printf("\n Seu tempo de jogo até agora foi de:\n");
-    printf("\nHoras: %i\n", (int)horas);
-    printf("Minutos: %i\n", (int)minutos);
-    printf("Segundos: %i\n", segundos);
+    if(horas==1)
+    {
+        printf("\n %i Hora.\n", (int)horas);
+    }
+    if(horas>1)
+    {
+        printf("\n %i Horas.\n", (int)horas);
+    }
+    if(minutos==1)
+    {
+        printf("\n %i Minuto.\n", (int)minutos);
+    }
+    if(minutos>1)
+    {
+        printf("\n %i Minutos.\n", (int)minutos);
+    }
+    if(segundos==1)
+    {
+        printf("\n %i Segundo.\n", segundos);
+    }
+    if(segundos>1)
+    {
+        printf("\n %i Segundos.\n", segundos);
+    }
     
 }
 
