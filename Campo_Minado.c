@@ -4,11 +4,12 @@
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
-#include <conio.h>
 #include <locale.h>
 
 #define l_constante 10
 #define c_constante 20
+//não foi pro git
+#define q_bombas_constante 40
 
 #define ANSI_COLOR_RED      "\x1b[31m" 
 #define ANSI_COLOR_GRAY     "\e[0;37m"
@@ -81,14 +82,14 @@ void cria_campo(campo * c){
 // Função para preencher a matriz com as minas
 void preenche_campo_minas(campo * c){
     //Essa parte do código gera os índices dos campos que ficaram as minas.
-    int indices_aleatorios[40][2];
+    int indices_aleatorios[q_bombas_constante][2];
     int sn=0;
     int linha_coordenada, coluna_coordenada=0;
 
     srand(time(NULL));
     
     // limpa a matriz de índices aleatórios colocando -1 em todas as posições  
-    for(int linha = 0; linha < 40; linha++){
+    for(int linha = 0; linha < q_bombas_constante; linha++){
         for(int coluna = 0; coluna < 2; coluna++){
             indices_aleatorios[linha][coluna] = -1;
         }
@@ -96,11 +97,11 @@ void preenche_campo_minas(campo * c){
     //-----------------------------------------------------------------------
 
     //Gera os 40 índices aleatórios das minas
-    for(int i = 0; i < 40; i++){
+    for(int i = 0; i < q_bombas_constante; i++){
         linha_coordenada = rand()%10;
         coluna_coordenada = rand()%20;    
 
-        for(int linha = 0; linha < 40; linha++){
+        for(int linha = 0; linha < q_bombas_constante; linha++){
             if(linha_coordenada == indices_aleatorios[linha][0] && coluna_coordenada == indices_aleatorios[linha][1]){
                 sn=1;
             }
@@ -117,7 +118,7 @@ void preenche_campo_minas(campo * c){
 
     //Preenche a matriz com as minas
 
-    for (int i = 0; i < 40; i++)
+    for (int i = 0; i < q_bombas_constante; i++)
     {
         c[0].matriz[indices_aleatorios[i][0]][indices_aleatorios[i][1]] = 'x';
     }
@@ -126,26 +127,6 @@ void preenche_campo_minas(campo * c){
 
 //Função para mostrar a matriz
 void exibir_campo(campo * c){
-
-    // 0 matriz com bombas 
-    // 1 matriz exibida para o usuário
-    // 2 matriz campo aberto ou fechado
-    // 3 matriz bombas vizinhas
-
-    // int cont_linha = 0;
-    // printf("    0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19 \n");
-    // printf("  ---------------------------------------------------------------------------------\n");
-    // for (int i = 0; i < 10; i++)
-    // {
-    //     printf("%d |", cont_linha);
-    //     for (int a = 0; a < 20; a++)
-    //     {
-    //         printf(" %c |", c[3].matriz[i][a]);
-    //     }
-    //     printf("\n");
-    //     printf("  ---------------------------------------------------------------------------------\n");
-    //     cont_linha++;
-    // }
 
     int cont_linha = 0;
     printf(ANSI_COLOR_WHITE "    0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19 \n" ANSI_COLOR_RESET);
@@ -189,11 +170,6 @@ void exibir_campo(campo * c){
 // e -1 para "O jogo continua". Essa função também verifica
 // se a coordenada é uma bomba, caso seja a função retorna 0 e o jogo acaba. 
 
-int ganhou_perdeu(campo *c){
-
-    return -1;
-    // retorna 1 ou 0;
-}
 
 
 // verifica se as coordenadas são válidas 
@@ -329,21 +305,30 @@ void modo_casual(campo * c, float *ref_tempo_inicial)
     printf("\n\n");
     printf("\t\t\t\t    CAMPO MINADO\n\n");
     exibir_campo(c);
-    printf("Escolha uma opção:\n\n 1 - Quero informar uma coordenada. \n 2 - Quero saber meu tempo de jogo. \n 3 - Desistir do jogo.");
+    printf("Escolha uma opção: 1 - Quero informar uma coordenada. 2 - Quero saber meu tempo de jogo. 3 - Desistir do jogo.\n");
     scanf("\n%i", &opcao);
-    if(opcao==1)
+    if(opcao == 1)
     {
         printf("\nInforme uma coordenada: ");
         scanf("%i %i", &coordenada1, &coordenada2);
         if (coordenada_valida(coordenada1, coordenada2) == 1)
         {
-            printf("verdadeiro");
+            // printf("verdadeiro\n");
             abrir_coordenada(c, coordenada1,coordenada2);
             exibir_campo(c);
+            int g_p = ganhou_perdeu(c);
+
+            if(g_p == 1){
+                printf("Você perdeu!");
+                exit(0);
+            }else if(g_p == 0){
+                printf("Você ganhou!");
+                exit(0);
+            }
         }
         else
         {
-            printf("falso");
+            // printf("falso");
         }
     }
     else if(opcao==2)
@@ -421,6 +406,47 @@ void menu(campo * c)
         }
     }
 }
+//função que finaliza o jogo se o jogador encontrar 
+//uma mina ou se ele abrir todos os campos sem minas.
+
+//não foi pro git
+int ganhou_perdeu(campo * c){
+    // 0 matriz com bombas 
+    // 1 matriz exibida para o usuário
+    // 2 matriz campo aberto ou fechado
+    // 3 matriz bombas vizinhas
+
+
+    // 1 - perdeu
+    // 0 - ganhou
+    // -1 continua
+
+    for(int linha =0; linha<l_constante; linha++){
+        for(int coluna =0; coluna<c_constante; coluna++){
+            if(c[2].matriz[linha][coluna]== '1' && c[0].matriz[linha][coluna]== 'x'){
+                return 1;
+            }
+        }
+    }
+
+    int cont=0;
+    for(int linha =0; linha<l_constante; linha++){
+        for(int coluna =0; coluna<c_constante; coluna++){
+            if(c[2].matriz[linha][coluna]== '1'){
+                cont++;
+            }
+        }
+    }
+    if(cont == ((l_constante * c_constante) - q_bombas_constante)){
+        return 0;
+    }
+
+    return -1;
+    
+
+
+}
+
 
 
 int main (){
