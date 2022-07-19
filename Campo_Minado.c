@@ -265,8 +265,6 @@ void opcao_invalida(int opcao)
 
 void calcular_tempo_jogo(float *ref_tempo_inicial, float *ref_tempo_final, float *ref_tempo_jogo)
 {
-    printf("%i\n", (int) *ref_tempo_inicial);
-    printf("%i\n", (int) *ref_tempo_final);
     *ref_tempo_jogo = *ref_tempo_final - *ref_tempo_inicial;
     float horas = *ref_tempo_jogo/3600;
     float minutos = (*ref_tempo_jogo/3600 - (int) horas) *60;
@@ -274,101 +272,29 @@ void calcular_tempo_jogo(float *ref_tempo_inicial, float *ref_tempo_final, float
     printf("\n Seu tempo de jogo até agora foi de:\n");
     if(horas==1)
     {
-        printf("\n %i Hora.\n", (int)horas);
+        printf(" %i Hora,", (int)horas);
     }
-    if(horas>1)
+    if(horas>1 || horas<1)
     {
-        printf("\n %i Horas.\n", (int)horas);
+        printf(" %i Horas,", (int)horas);
     }
     if(minutos==1)
     {
-        printf("\n %i Minuto.\n", (int)minutos);
+        printf(" %i Minuto e", (int)minutos);
     }
-    if(minutos>1)
+    if(minutos>1 || minutos<1)
     {
-        printf("\n %i Minutos.\n", (int)minutos);
+        printf(" %i Minutos e", (int)minutos);
     }
     if(segundos==1)
     {
-        printf("\n %i Segundo.\n", segundos);
+        printf(" %i Segundo.", segundos);
     }
-    if(segundos>1)
+    if(segundos>1 || segundos<1)
     {
-        printf("\n %i Segundos.\n", segundos);
+        printf(" %i Segundos.", segundos);
     }
     
-}
-
-void modo_casual(campo * c, float *ref_tempo_inicial)
-{
-    int coordenada1, coordenada2,opcao;
-    printf("\n\n");
-    printf("\t\t\t\t    CAMPO MINADO\n\n");
-    exibir_campo(c);
-    printf("Escolha uma opção: 1 - Quero informar uma coordenada. 2 - Quero saber meu tempo de jogo. 3 - Desistir do jogo.\n");
-    scanf("\n%i", &opcao);
-    if(opcao == 1)
-    {
-        printf("\nInforme uma coordenada: ");
-        scanf("%i %i", &coordenada1, &coordenada2);
-        if (coordenada_valida(coordenada1, coordenada2) == 1)
-        {
-            // printf("verdadeiro\n");
-            abrir_coordenada(c, coordenada1,coordenada2);
-            exibir_campo(c);
-            int g_p = ganhou_perdeu(c);
-
-            if(g_p == 1){
-                printf("Você perdeu!");
-                exit(0);
-            }else if(g_p == 0){
-                printf("Você ganhou!");
-                exit(0);
-            }
-        }
-        else
-        {
-            // printf("falso");
-        }
-    }
-    else if(opcao==2)
-    {
-        time_t tempo;
-        struct tm *infoTempo;
-        time(&tempo);
-        infoTempo=localtime(&tempo);
-        float tempo_final = infoTempo->tm_sec+(infoTempo->tm_min*60)+(infoTempo->tm_hour-3)*3600;
-        float *ref_tempo_final = &tempo_final;
-        float tempo_jogo;
-        float *ref_tempo_jogo = &tempo_jogo;
-        calcular_tempo_jogo(ref_tempo_inicial, ref_tempo_final, ref_tempo_jogo);
-    }
-    else if (opcao==3)
-    {
-        int opcao_saida=5;
-        while (opcao_saida<1 || opcao_saida>2)
-        {
-        printf("\nTem certeza que deseja sair do jogo? Todo seu progresso será apagado. Digite 1 para (Sair do Jogo) e 2 para (Voltar ao Jogo).\n\n");
-        scanf("%i", &opcao_saida);
-        if(opcao_saida == 1)
-        {
-            exit(0);
-        }
-        else if(opcao_saida == 2)
-        {
-            printf("Ok! Voltando para o mesmo ponto do jogo...");
-        }
-        else
-        {
-            opcao_invalida(opcao_saida);
-        }
-        }
-    }
-    else
-    {
-        opcao_invalida(opcao);
-    }
-    modo_casual(c,ref_tempo_inicial);
 }
 
 void menu(campo * c)
@@ -405,6 +331,82 @@ void menu(campo * c)
             exit(0);
         }
     }
+}
+void modo_casual(campo * c, float *ref_tempo_inicial)
+{
+    int coordenada1, coordenada2,opcao;
+    printf("\n\n");
+    printf("\t\t\t\t    CAMPO MINADO\n\n");
+    exibir_campo(c);
+    printf("Escolha uma opção: 1 - Quero informar uma coordenada. 2 - Quero saber meu tempo de jogo. 3 - Desistir do jogo.\n");
+    scanf("\n%i", &opcao);
+    if(opcao == 1)
+    {
+        printf("\nInforme uma coordenada: ");
+        scanf("%i %i", &coordenada1, &coordenada2);
+        if (coordenada_valida(coordenada1, coordenada2) == 1)
+        {
+            // printf("verdadeiro\n");
+            abrir_coordenada(c, coordenada1,coordenada2);
+            exibir_campo(c);
+            int g_p = ganhou_perdeu(c);
+
+            if(g_p == 1){
+                printf("Você perdeu!");
+                exit(0);
+            }else if(g_p == 0){
+                printf("Você ganhou!");
+                exit(0);
+            }
+        }
+        else
+        {
+            printf("Coordenada inválida! (%i %i) Tente novamente.", coordenada1, coordenada2);
+        }
+    }
+    else if(opcao==2)
+    {
+        time_t tempo;
+        struct tm *infoTempo;
+        time(&tempo);
+        infoTempo=localtime(&tempo);
+        float tempo_final = infoTempo->tm_sec+(infoTempo->tm_min*60)+(infoTempo->tm_hour-3)*3600;
+        float *ref_tempo_final = &tempo_final;
+        float tempo_jogo;
+        float *ref_tempo_jogo = &tempo_jogo;
+        calcular_tempo_jogo(ref_tempo_inicial, ref_tempo_final, ref_tempo_jogo);
+    }
+    else if (opcao==3)
+    {
+        int opcao_saida=5;
+        while (opcao_saida<1 || opcao_saida>2)
+        {
+        printf("\nTem certeza que deseja sair do jogo? Todo seu progresso será apagado. Digite 1 para (Sair do Jogo) e 2 para (Voltar ao Jogo).\n\n");
+        scanf("%i", &opcao_saida);
+        if(opcao_saida == 1)
+        {
+            // free(c);
+            // cria_campo(c);
+            // preenche_campo_minas(c);
+            // contar_bombas_vizinhas(c);
+            // fechar_campos(c);
+            menu(c);
+        }
+        else if(opcao_saida == 2)
+        {
+            printf("Ok! Voltando para o mesmo ponto do jogo...");
+        }
+        else
+        {
+            opcao_invalida(opcao_saida);
+        }
+        }
+    }
+    else
+    {
+        opcao_invalida(opcao);
+    }
+    modo_casual(c,ref_tempo_inicial);
 }
 //função que finaliza o jogo se o jogador encontrar 
 //uma mina ou se ele abrir todos os campos sem minas.
@@ -443,8 +445,174 @@ int ganhou_perdeu(campo * c){
 
     return -1;
     
+}
 
 
+
+void modo_autonomo(campo *c) {
+  srand(time(NULL));
+  int linha_inicial = rand() % 10;
+  int coluna_inicial = rand() % 20;
+
+  abrir_coordenada(c, linha_inicial, coluna_inicial);
+  exibir_campo(c);
+  int g_p = ganhou_perdeu(c);
+
+  if (g_p == 1) {
+    printf("Você perdeu!");
+    exit(0);
+  } else if (g_p == 0) {
+    printf("Você ganhou!");
+    exit(0);
+  }
+
+  
+}
+
+void solicitar_ajuda(campo * c) {
+  // 0 matriz com bombas
+  // 1 matriz exibida para o usuário
+  // 2 matriz campo aberto ou fechado
+  // 3 matriz bombas vizinhas
+
+  // 1 - perdeu
+  // 0 - ganhou
+  // -1 continua
+
+  // Se todos os campos estiverem fechados as coodenadas são aleatórias
+  srand(time(NULL));
+  int cont_todos_campos_fechados = 0;
+  for (int linha = 0; linha < l_constante; linha++) {
+    for (int coluna = 0; coluna < c_constante; coluna++) {
+      if (c[2].matriz[linha][coluna] == '0') {
+        cont_todos_campos_fechados++;
+      }
+    }
+  }
+  if (cont_todos_campos_fechados == ((l_constante * c_constante) - q_bombas_constante)) {
+      printf("A coordenada %d %d é provável não ter bomba", (int)(rand()%10), (int)(rand()%20));
+  }
+  
+  int num_bombas=0;
+
+  int matriz_possiveis_minas[q_bombas_constante][2];
+  int cont, cont2 = 0;
+
+  int tf_1, tf_2, tf_3, tf_4, tf_5, tf_6, tf_7, tf_8 = 0;
+
+  for (int linha = 0; linha < l_constante; linha++) {
+    for (int coluna = 0; coluna < c_constante; coluna++) {
+      if (c[2].matriz[linha][coluna] == '1' &&
+          c[3].matriz[linha][coluna] == '1') {
+
+        if (c[2].matriz[linha][coluna - 1] == '1') {
+          tf_1 = 1;
+          cont++;
+        }
+        if (c[2].matriz[linha][coluna + 1] == '1') {
+          tf_2 = 1;
+          cont++;
+        }
+        if (c[2].matriz[linha - 1][coluna] == '1') {
+          tf_3 = 1;
+          cont++;
+        }
+        if (c[2].matriz[linha + 1][coluna] == '1') {
+          tf_4 = 1;
+          cont++;
+        }
+
+        if (c[2].matriz[linha - 1][coluna - 1] == '1') {
+          tf_5 = 1;
+          cont++;
+        }
+        if (c[2].matriz[linha - 1][coluna + 1] == '1') {
+          tf_6 = 1;
+          cont++;
+        }
+        if (c[2].matriz[linha + 1][coluna - 1] == '1') {
+          tf_7 = 1;
+          cont++;
+        }
+        if (c[2].matriz[linha + 1][coluna + 1] == '1') {
+          tf_8 = 1;
+          cont++;
+        }
+      }
+      num_bombas = c[3].matriz[linha][coluna] + '0';
+      
+      if (cont == (8 - num_bombas)) {
+
+        if (tf_1 == 0) {
+          matriz_possiveis_minas[cont2][0] = linha;
+          matriz_possiveis_minas[cont2][0] = coluna-1;
+          cont++;
+        }
+
+        if (tf_2 == 0) {
+          matriz_possiveis_minas[cont2][0] = linha+1;
+          matriz_possiveis_minas[cont2][0] = coluna;
+          cont++;
+        }
+
+        if (tf_3 == 0) {
+          matriz_possiveis_minas[cont2][0] = linha-1;
+          matriz_possiveis_minas[cont2][0] = coluna;
+          cont++;
+        }
+
+        if (tf_4 == 0) {
+          matriz_possiveis_minas[cont2][0] = linha+1;
+          matriz_possiveis_minas[cont2][0] = coluna;
+          cont++;
+        }
+
+        if (tf_5 == 0) {
+          matriz_possiveis_minas[cont2][0] = linha-1;
+          matriz_possiveis_minas[cont2][0] = coluna-1;
+          cont++;
+        }
+
+        if (tf_6 == 0) {
+          matriz_possiveis_minas[cont2][0] = linha-1;
+          matriz_possiveis_minas[cont2][0] = coluna+1;
+          cont++;
+        }
+
+        if (tf_7 == 0) {
+          matriz_possiveis_minas[cont2][0] = linha+1;
+          matriz_possiveis_minas[cont2][0] = coluna-1;
+          cont++;
+        }
+
+        if (tf_8 == 0) {
+          matriz_possiveis_minas[cont2][0] = linha+1;
+          matriz_possiveis_minas[cont2][0] = coluna+1;
+          cont++;
+        }
+        
+      }
+    }
+  }
+  int v_ou_f =0;
+  for(int linha = 0; linha < l_constante; linha++){
+    for(int coluna = 0;coluna < c_constante; coluna++){
+      if(c[2].matriz[linha][coluna] == '0'){
+        
+        for(int i = 0; i < cont; i++){
+          if(linha == matriz_possiveis_minas[0][i] && coluna == matriz_possiveis_minas[1][i]){
+            v_ou_f = 1;
+          }
+        }
+        
+      }
+      if(v_ou_f == 0){
+        // é uma possível jogada
+        printf("A coordenada %d %d é provável não ter bomba", linha, coluna);
+        
+      }
+    }
+  }
 }
 
 
