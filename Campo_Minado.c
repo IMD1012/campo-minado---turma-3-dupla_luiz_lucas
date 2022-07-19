@@ -318,6 +318,7 @@ void menu(campo * c)
             infoTempo=localtime(&tempo);
             float tempo_inicial = infoTempo->tm_sec+(infoTempo->tm_min*60)+(infoTempo->tm_hour-3)*3600;
             float *ref_tempo_inicial = &tempo_inicial;
+            exibir_campo(c);
             modo_casual(c,ref_tempo_inicial);
             
         }
@@ -337,7 +338,7 @@ void modo_casual(campo * c, float *ref_tempo_inicial)
     int coordenada1, coordenada2,opcao;
     printf("\n\n");
     printf("\t\t\t\t    CAMPO MINADO\n\n");
-    exibir_campo(c);
+    // exibir_campo(c);
     printf("Escolha uma opção: 1 - Quero informar uma coordenada. 2 - Quero saber meu tempo de jogo. 3 - Desistir do jogo.\n");
     scanf("\n%i", &opcao);
     if(opcao == 1)
@@ -358,6 +359,7 @@ void modo_casual(campo * c, float *ref_tempo_inicial)
                 printf("Você ganhou!");
                 exit(0);
             }
+            modo_casual(c,ref_tempo_inicial);
         }
         else
         {
@@ -375,6 +377,9 @@ void modo_casual(campo * c, float *ref_tempo_inicial)
         float tempo_jogo;
         float *ref_tempo_jogo = &tempo_jogo;
         calcular_tempo_jogo(ref_tempo_inicial, ref_tempo_final, ref_tempo_jogo);
+        printf("\n");
+        exibir_campo(c);
+        modo_casual(c,ref_tempo_inicial);
     }
     else if (opcao==3)
     {
@@ -385,16 +390,16 @@ void modo_casual(campo * c, float *ref_tempo_inicial)
         scanf("%i", &opcao_saida);
         if(opcao_saida == 1)
         {
-            // free(c);
-            // cria_campo(c);
-            // preenche_campo_minas(c);
-            // contar_bombas_vizinhas(c);
-            // fechar_campos(c);
+            exit(0);
             menu(c);
         }
         else if(opcao_saida == 2)
         {
-            printf("Ok! Voltando para o mesmo ponto do jogo...");
+            printf("Ok! Voltando para o mesmo ponto do jogo...\n");
+
+            exibir_campo(c);
+            modo_casual(c,ref_tempo_inicial);
+            // modo_casual(c,ref_tempo_inicial);
         }
         else
         {
@@ -406,7 +411,7 @@ void modo_casual(campo * c, float *ref_tempo_inicial)
     {
         opcao_invalida(opcao);
     }
-    modo_casual(c,ref_tempo_inicial);
+    
 }
 //função que finaliza o jogo se o jogador encontrar 
 //uma mina ou se ele abrir todos os campos sem minas.
