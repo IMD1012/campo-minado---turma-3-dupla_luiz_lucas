@@ -35,11 +35,11 @@ typedef struct{
 
 void fechar_campos(campo * c)
 {
-    for (int i=0; i<10; i++)
+    for (int linha=0; linha<l_constante; linha++)
     {
-        for(int j=0; j<20; j++)
+        for(int coluna=0; coluna<c_constante; coluna++)
         {
-            c[2].matriz[i][j] = '0';
+            c[2].matriz[linha][coluna] = '0';
         }
     }
 }
@@ -339,7 +339,7 @@ void modo_casual(campo * c, float *ref_tempo_inicial)
     printf("\n\n");
     printf("\t\t\t\t    CAMPO MINADO\n\n");
     // exibir_campo(c);
-    printf("Escolha uma opção: 1 - Quero informar uma coordenada. 2 - Quero saber meu tempo de jogo. 3 - Desistir do jogo.\n");
+    printf("Escolha uma opção: 1 - Informar uma coordenada. 2 - Tempo de jogo. 3 - Desistir do jogo. 4 - Solicitar ajuda.\n");
     scanf("\n%i", &opcao);
     if(opcao == 1)
     {
@@ -407,9 +407,15 @@ void modo_casual(campo * c, float *ref_tempo_inicial)
         }
         }
     }
-    else
+    else if(opcao == 4)
     {
+        solicitar_ajuda(c);
+        exibir_campo(c);
+        modo_casual(c,ref_tempo_inicial);
+    }else{
         opcao_invalida(opcao);
+        exibir_campo(c);
+        modo_casual(c,ref_tempo_inicial);
     }
     
 }
@@ -455,37 +461,41 @@ int ganhou_perdeu(campo * c){
 
 
 void modo_autonomo(campo *c) {
-  srand(time(NULL));
-  int linha_inicial = rand() % 10;
-  int coluna_inicial = rand() % 20;
+//   srand(time(NULL));
+//   int linha_inicial = rand() % 10;
+//   int coluna_inicial = rand() % 20;
 
-  abrir_coordenada(c, linha_inicial, coluna_inicial);
-  exibir_campo(c);
-  int g_p = ganhou_perdeu(c);
+//   abrir_coordenada(c, linha_inicial, coluna_inicial);
+//   exibir_campo(c);
+//   int g_p = ganhou_perdeu(c);
 
-  if (g_p == 1) {
-    printf("Você perdeu!");
-    exit(0);
-  } else if (g_p == 0) {
-    printf("Você ganhou!");
-    exit(0);
-  }
+//   if (g_p == 1) {
+//     printf("Você perdeu!");
+//     exit(0);
+//   } else if (g_p == 0) {
+//     printf("Você ganhou!");
+//     exit(0);
+//   }
 
-  
 }
 
-void solicitar_ajuda(campo * c) {
-  // 0 matriz com bombas
-  // 1 matriz exibida para o usuário
-  // 2 matriz campo aberto ou fechado
-  // 3 matriz bombas vizinhas
+void solicitar_ajuda(campo * c){
 
-  // 1 - perdeu
-  // 0 - ganhou
-  // -1 continua
+    // printf("oioioi\n");
+//   0 matriz com bombas
+//   1 matriz exibida para o usuário
+//   2 matriz campo aberto ou fechado
+//   3 matriz bombas vizinhas
 
-  // Se todos os campos estiverem fechados as coodenadas são aleatórias
+//   1 - perdeu
+//   0 - ganhou
+//   -1 continua
+
+//   Se todos os campos estiverem fechados as coodenadas são aleatórias
+
+//Funcionando 
   srand(time(NULL));
+
   int cont_todos_campos_fechados = 0;
   for (int linha = 0; linha < l_constante; linha++) {
     for (int coluna = 0; coluna < c_constante; coluna++) {
@@ -494,130 +504,132 @@ void solicitar_ajuda(campo * c) {
       }
     }
   }
-  if (cont_todos_campos_fechados == ((l_constante * c_constante) - q_bombas_constante)) {
-      printf("A coordenada %d %d é provável não ter bomba", (int)(rand()%10), (int)(rand()%20));
+
+  if (cont_todos_campos_fechados == (l_constante * c_constante)) {
+      printf("A coordenada %d %d é provável não ter bomba\n", (int)(rand()%10), (int)(rand()%20));
   }
-  
-  int num_bombas=0;
+//---------------------------------------------------------------------
 
-  int matriz_possiveis_minas[q_bombas_constante][2];
-  int cont, cont2 = 0;
+//   int num_bombas=0;
 
-  int tf_1, tf_2, tf_3, tf_4, tf_5, tf_6, tf_7, tf_8 = 0;
+//   int matriz_possiveis_minas[q_bombas_constante][2];
+//   int cont, cont2 = 0;
 
-  for (int linha = 0; linha < l_constante; linha++) {
-    for (int coluna = 0; coluna < c_constante; coluna++) {
-      if (c[2].matriz[linha][coluna] == '1' &&
-          c[3].matriz[linha][coluna] == '1') {
+//   int tf_1, tf_2, tf_3, tf_4, tf_5, tf_6, tf_7, tf_8 = 0;
 
-        if (c[2].matriz[linha][coluna - 1] == '1') {
-          tf_1 = 1;
-          cont++;
-        }
-        if (c[2].matriz[linha][coluna + 1] == '1') {
-          tf_2 = 1;
-          cont++;
-        }
-        if (c[2].matriz[linha - 1][coluna] == '1') {
-          tf_3 = 1;
-          cont++;
-        }
-        if (c[2].matriz[linha + 1][coluna] == '1') {
-          tf_4 = 1;
-          cont++;
-        }
+//   for (int linha = 0; linha < l_constante; linha++) {
+//     for (int coluna = 0; coluna < c_constante; coluna++) {
+//       if (c[2].matriz[linha][coluna] == '1' &&
+//           c[3].matriz[linha][coluna] == '1') {
 
-        if (c[2].matriz[linha - 1][coluna - 1] == '1') {
-          tf_5 = 1;
-          cont++;
-        }
-        if (c[2].matriz[linha - 1][coluna + 1] == '1') {
-          tf_6 = 1;
-          cont++;
-        }
-        if (c[2].matriz[linha + 1][coluna - 1] == '1') {
-          tf_7 = 1;
-          cont++;
-        }
-        if (c[2].matriz[linha + 1][coluna + 1] == '1') {
-          tf_8 = 1;
-          cont++;
-        }
-      }
-      num_bombas = c[3].matriz[linha][coluna] + '0';
+//         if (c[2].matriz[linha][coluna - 1] == '1') {
+//           tf_1 = 1;
+//           cont++;
+//         }
+//         if (c[2].matriz[linha][coluna + 1] == '1') {
+//           tf_2 = 1;
+//           cont++;
+//         }
+//         if (c[2].matriz[linha - 1][coluna] == '1') {
+//           tf_3 = 1;
+//           cont++;
+//         }
+//         if (c[2].matriz[linha + 1][coluna] == '1') {
+//           tf_4 = 1;
+//           cont++;
+//         }
+
+//         if (c[2].matriz[linha - 1][coluna - 1] == '1') {
+//           tf_5 = 1;
+//           cont++;
+//         }
+//         if (c[2].matriz[linha - 1][coluna + 1] == '1') {
+//           tf_6 = 1;
+//           cont++;
+//         }
+//         if (c[2].matriz[linha + 1][coluna - 1] == '1') {
+//           tf_7 = 1;
+//           cont++;
+//         }
+//         if (c[2].matriz[linha + 1][coluna + 1] == '1') {
+//           tf_8 = 1;
+//           cont++;
+//         }
+//       }
+//       num_bombas = c[3].matriz[linha][coluna] + '0';
       
-      if (cont == (8 - num_bombas)) {
+//       if (cont == (8 - num_bombas)) {
 
-        if (tf_1 == 0) {
-          matriz_possiveis_minas[cont2][0] = linha;
-          matriz_possiveis_minas[cont2][0] = coluna-1;
-          cont++;
-        }
+//         if (tf_1 == 0) {
+//           matriz_possiveis_minas[cont2][0] = linha;
+//           matriz_possiveis_minas[cont2][0] = coluna-1;
+//           cont++;
+//         }
 
-        if (tf_2 == 0) {
-          matriz_possiveis_minas[cont2][0] = linha+1;
-          matriz_possiveis_minas[cont2][0] = coluna;
-          cont++;
-        }
+//         if (tf_2 == 0) {
+//           matriz_possiveis_minas[cont2][0] = linha+1;
+//           matriz_possiveis_minas[cont2][0] = coluna;
+//           cont++;
+//         }
 
-        if (tf_3 == 0) {
-          matriz_possiveis_minas[cont2][0] = linha-1;
-          matriz_possiveis_minas[cont2][0] = coluna;
-          cont++;
-        }
+//         if (tf_3 == 0) {
+//           matriz_possiveis_minas[cont2][0] = linha-1;
+//           matriz_possiveis_minas[cont2][0] = coluna;
+//           cont++;
+//         }
 
-        if (tf_4 == 0) {
-          matriz_possiveis_minas[cont2][0] = linha+1;
-          matriz_possiveis_minas[cont2][0] = coluna;
-          cont++;
-        }
+//         if (tf_4 == 0) {
+//           matriz_possiveis_minas[cont2][0] = linha+1;
+//           matriz_possiveis_minas[cont2][0] = coluna;
+//           cont++;
+//         }
 
-        if (tf_5 == 0) {
-          matriz_possiveis_minas[cont2][0] = linha-1;
-          matriz_possiveis_minas[cont2][0] = coluna-1;
-          cont++;
-        }
+//         if (tf_5 == 0) {
+//           matriz_possiveis_minas[cont2][0] = linha-1;
+//           matriz_possiveis_minas[cont2][0] = coluna-1;
+//           cont++;
+//         }
 
-        if (tf_6 == 0) {
-          matriz_possiveis_minas[cont2][0] = linha-1;
-          matriz_possiveis_minas[cont2][0] = coluna+1;
-          cont++;
-        }
+//         if (tf_6 == 0) {
+//           matriz_possiveis_minas[cont2][0] = linha-1;
+//           matriz_possiveis_minas[cont2][0] = coluna+1;
+//           cont++;
+//         }
 
-        if (tf_7 == 0) {
-          matriz_possiveis_minas[cont2][0] = linha+1;
-          matriz_possiveis_minas[cont2][0] = coluna-1;
-          cont++;
-        }
+//         if (tf_7 == 0) {
+//           matriz_possiveis_minas[cont2][0] = linha+1;
+//           matriz_possiveis_minas[cont2][0] = coluna-1;
+//           cont++;
+//         }
 
-        if (tf_8 == 0) {
-          matriz_possiveis_minas[cont2][0] = linha+1;
-          matriz_possiveis_minas[cont2][0] = coluna+1;
-          cont++;
-        }
+//         if (tf_8 == 0) {
+//           matriz_possiveis_minas[cont2][0] = linha+1;
+//           matriz_possiveis_minas[cont2][0] = coluna+1;
+//           cont++;
+//         }
         
-      }
-    }
-  }
-  int v_ou_f =0;
-  for(int linha = 0; linha < l_constante; linha++){
-    for(int coluna = 0;coluna < c_constante; coluna++){
-      if(c[2].matriz[linha][coluna] == '0'){
+//       }
+//     }
+//   }
+//   int v_ou_f =0;
+//   for(int linha = 0; linha < l_constante; linha++){
+//     for(int coluna = 0;coluna < c_constante; coluna++){
+//       if(c[2].matriz[linha][coluna] == '0'){
         
-        for(int i = 0; i < cont; i++){
-          if(linha == matriz_possiveis_minas[0][i] && coluna == matriz_possiveis_minas[1][i]){
-            v_ou_f = 1;
-          }
-        }
+//         for(int i = 0; i < cont; i++){
+//           if(linha == matriz_possiveis_minas[0][i] && coluna == matriz_possiveis_minas[1][i]){
+//             v_ou_f = 1;
+//           }
+//         }
         
-      }
-      if(v_ou_f == 0){
-        // é uma possível jogada
-        printf("A coordenada %d %d é provável não ter bomba", linha, coluna);
+//       }
+//       if(v_ou_f == 0){
+//         // é uma possível jogada
+//         printf("A coordenada %d %d é provável não ter bomba", linha, coluna);
         
-      }
-    }
-  }
+//       }
+//     }
+  //}
 }
 
 
