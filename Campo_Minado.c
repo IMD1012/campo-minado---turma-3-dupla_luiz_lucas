@@ -50,6 +50,7 @@ void cria_campo(campo * c){
     c[1].matriz = calloc(l_constante, sizeof(char*));
     c[2].matriz = calloc(l_constante, sizeof(char*));
     c[3].matriz = calloc(l_constante, sizeof(char*));
+    c[4].matriz = calloc(l_constante, sizeof(char*));
 
     for (int linha = 0; linha < 10; linha++)
     {
@@ -57,6 +58,7 @@ void cria_campo(campo * c){
        c[1].matriz[linha] = calloc(c_constante, sizeof(char));
        c[2].matriz[linha] = calloc(c_constante, sizeof(char));
        c[3].matriz[linha] = calloc(c_constante, sizeof(char));
+       c[4].matriz[linha] = calloc(c_constante, sizeof(char));
     }
 
     //Adiciona um espaço inicial em todas as posições 
@@ -67,6 +69,7 @@ void cria_campo(campo * c){
             c[1].matriz[linha][coluna] = ' ';
             c[2].matriz[linha][coluna] = ' ';
             c[3].matriz[linha][coluna] = ' ';
+            c[4].matriz[linha][coluna] = ' ';
         }
     }
     // Define que tordos os campos inicialmente estão fechados 
@@ -75,6 +78,7 @@ void cria_campo(campo * c){
         for(int coluna=0; coluna < c_constante; coluna++)     
         {
             c[2].matriz[linha][coluna] = '0';
+            c[4].matriz[linha][coluna] = '0';
         }
     }
 }
@@ -494,7 +498,7 @@ void identificar_campo_sem_bomba(campo * c)
     // 3 matriz bombas vizinhas
     int k=0;
     int coordenada_bombas[40][2];
-    k++;
+    
     for(int i=0; i<l_constante; i++)
     {
         for(int j=0; j<c_constante; j++)
@@ -622,7 +626,7 @@ void identificar_campo_sem_bomba(campo * c)
                 {
                     for(int l=k_inicio; l<k; l++)
                     {
-                        printf("A coordenada %i %i tem uma bomba.\n", coordenada_bombas[l][0], coordenada_bombas[l][1]);
+                        c[4].matriz[coordenada_bombas[l][0]][coordenada_bombas[l][1]] = '1';
                     }
                 }
                 else
@@ -634,25 +638,227 @@ void identificar_campo_sem_bomba(campo * c)
         }
     }
 }
-void modo_autonomo(campo *c) {
-//   srand(time(NULL));
-//   int linha_inicial = rand() % 10;
-//   int coluna_inicial = rand() % 20;
 
-//   abrir_coordenada(c, linha_inicial, coluna_inicial);
-//   exibir_campo(c);
-//   int g_p = ganhou_perdeu(c);
-
-//   if (g_p == 1) {
-//     printf("Você perdeu!");
-//     exit(0);
-//   } else if (g_p == 0) {
-//     printf("Você ganhou!");
-//     exit(0);
-//   }
-
+void abrir_campos(campo * c)
+{
+    // 0 matriz com bombas 
+    // 1 matriz exibida para o usuário
+    // 2 matriz campo aberto ou fechado
+    // 3 matriz bombas vizinhas
+    // 4 matriz bombas descobertas
+    
+    int k=0;
+    for(int i=0; i<l_constante; i++)
+    {
+        for(int j=0; j<c_constante; j++)
+        {
+            int k=0;
+            int cont=0;
+            int coordenada_validas=0;
+            int coordenada_abrir[140][2];
+            if(c[2].matriz[i][j]=='1' && c[3].matriz[i][j]!='0')
+            {
+                if(coordenada_valida(i-1, j-1))
+                {
+                    coordenada_validas++;
+                    if(c[4].matriz[i-1][j-1]=='1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        if(c[2].matriz[i-1][j-1]=='0')
+                        {
+                            coordenada_abrir[k][0] = i-1;
+                            coordenada_abrir[k][1] = j-1;
+                            k++;
+                        }
+                    }
+                }
+                if(coordenada_valida(i-1, j))
+                {
+                    coordenada_validas++;
+                    if(c[4].matriz[i-1][j]=='1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        if(c[2].matriz[i-1][j]=='0')
+                        {
+                            coordenada_abrir[k][0] = i-1;
+                            coordenada_abrir[k][1] = j;
+                            k++;
+                        }
+                    }
+                }
+                if(coordenada_valida(i-1, j+1))
+                {
+                    coordenada_validas++;
+                    if(c[4].matriz[i-1][j+1]=='1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        if(c[2].matriz[i-1][j+1]=='0')
+                        {
+                            coordenada_abrir[k][0] = i-1;
+                            coordenada_abrir[k][1] = j+1;
+                            k++;
+                        }
+                    }
+                }
+                if(coordenada_valida(i, j-1))
+                {
+                    coordenada_validas++;
+                    if(c[4].matriz[i][j-1]=='1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        if(c[2].matriz[i][j-1]=='0')
+                        {
+                            coordenada_abrir[k][0] = i;
+                            coordenada_abrir[k][1] = j-1;
+                            k++;
+                        }
+                    }
+                }
+                if(coordenada_valida(i, j+1))
+                {
+                    coordenada_validas++;
+                    if(c[4].matriz[i][j+1]=='1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        if(c[2].matriz[i][j+1]=='0')
+                        {
+                            coordenada_abrir[k][0] = i;
+                            coordenada_abrir[k][1] = j+1;
+                            k++;
+                        }
+                    }
+                }
+                if(coordenada_valida(i+1, j-1))
+                {
+                    coordenada_validas++;
+                    if(c[4].matriz[i+1][j-1]=='1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        if(c[2].matriz[i+1][j-1]=='0')
+                        {
+                            coordenada_abrir[k][0] = i+1;
+                            coordenada_abrir[k][1] = j-1;
+                            k++;
+                        }
+                    }
+                }
+                if(coordenada_valida(i+1, j))
+                {
+                    coordenada_validas++;
+                    if(c[4].matriz[i+1][j]=='1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        if(c[2].matriz[i+1][j]=='0')
+                        {
+                            coordenada_abrir[k][0] = i+1;
+                            coordenada_abrir[k][1] = j;
+                            k++;
+                        }
+                    }
+                }
+                if(coordenada_valida(i+1, j+1))
+                {
+                    coordenada_validas++;
+                    if(c[4].matriz[i+1][j+1]=='1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        if(c[2].matriz[i+1][j+1]=='0')
+                        {
+                            coordenada_abrir[k][0] = i+1;
+                            coordenada_abrir[k][1] = j+1;
+                            k++;
+                        }
+                    }
+                }
+                char caractere = cont + '0';
+                if(caractere == c[3].matriz[i][j])
+                {
+                    for(int l=0; l<k; l++)
+                    {
+                        printf("abra as coordenadas %i %i\n", coordenada_abrir[l][0], coordenada_abrir[l][1]);
+                        abrir_coordenada(c, coordenada_abrir[l][0],coordenada_abrir[l][1]);
+                    }
+                }
+                
+            }
+        }
+    }
+    
 }
 
+void modo_autonomo(campo *c) 
+{
+    srand(time(NULL));
+    int linha_coordenada = rand()%10;
+    int coluna_coordenada = rand()%20;
+    
+    int s_ou_n = 0;
+    abrir_coordenada(c, linha_coordenada, coluna_coordenada);
+    exibir_campo(c);
+    
+    
+    
+    for(int linha=0; linha< l_constante; linha++){
+         for(int coluna=0; coluna< l_constante; coluna++){
+            if(c[2].matriz[linha][coluna] == '1'){
+                s_ou_n = 1;     
+            }   
+        }     
+    }
+    
+    if(s_ou_n == 1){
+     
+    
+        identificar_campo_sem_bomba(c);
+        for(int i = 0; i<l_constante; i++)
+        {
+            for(int j = 0; j<c_constante; j++)
+            {
+                printf("%c ", c[4].matriz[i][j]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+        abrir_campos(c);
+    
+    identificar_campo_sem_bomba(c);
+    for(int i = 0; i<l_constante; i++)
+    {
+        for(int j = 0; j<c_constante; j++)
+        {
+            printf("%c ", c[4].matriz[i][j]);
+        }
+        printf("\n");
+    }
+    exibir_campo(c);
+    
+
+    }
+}
 void modo_casual(campo * c, float *ref_tempo_inicial)
 {
     int coordenada1, coordenada2,opcao;
@@ -787,6 +993,7 @@ void menu(campo * c)
         else if(opcao == 2)
         {
             printf("\nVocê selecionou a opção (%i). Iniciando Modo Autônomo... \n\n", opcao);
+            modo_autonomo(c);
         }
         else if(opcao == 3)
         {
@@ -818,7 +1025,7 @@ int main (){
 
     setlocale(LC_ALL, "Portuguese");
     campo *c;
-    c = malloc (sizeof(campo)*4);
+    c = malloc (sizeof(campo)*5);
     cria_campo(c);
     preenche_campo_minas(c);
     contar_bombas_vizinhas(c);
