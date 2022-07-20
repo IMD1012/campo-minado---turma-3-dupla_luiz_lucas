@@ -9,7 +9,7 @@
 #define l_constante 10
 #define c_constante 20
 //não foi pro git
-#define q_bombas_constante 40
+#define q_bombas_constante 20
 
 #define ANSI_COLOR_RED      "\x1b[31m" 
 #define ANSI_COLOR_GRAY     "\e[0;37m"
@@ -297,187 +297,6 @@ void calcular_tempo_jogo(float *ref_tempo_inicial, float *ref_tempo_final, float
     
 }
 
-void menu(campo * c)
-{
-    int opcao;
-    printf("\nOlá! Seja bem-vindo(a) ao Campo Minado.\n\n Por favor, escolha uma opção de 1 a 3. \n 1 - Jogar: Modo Casual\n 2 - Modo Autônomo\n 3 - Sair.\n\n");
-    scanf("%i", &opcao);
-    if (opcao>3 || opcao<1)
-    {
-        opcao_invalida(opcao);
-        menu(c);
-    }
-    else
-    {
-        if (opcao == 1)
-        {
-            printf("\nVocê selecionou a opção (%i). Iniciando Modo Casual... \n\n", opcao);
-            time_t tempo;
-            struct tm *infoTempo;
-            time(&tempo);
-            infoTempo=localtime(&tempo);
-            float tempo_inicial = infoTempo->tm_sec+(infoTempo->tm_min*60)+(infoTempo->tm_hour-3)*3600;
-            float *ref_tempo_inicial = &tempo_inicial;
-            exibir_campo(c);
-            modo_casual(c,ref_tempo_inicial);
-            
-        }
-        else if(opcao == 2)
-        {
-            printf("\nVocê selecionou a opção (%i). Iniciando Modo Autônomo... \n\n", opcao);
-        }
-        else if(opcao == 3)
-        {
-            printf("\nVocê selecionou a opção (%i). Encerrando programa... \n\n", opcao);
-            exit(0);
-        }
-    }
-}
-void modo_casual(campo * c, float *ref_tempo_inicial)
-{
-    int coordenada1, coordenada2,opcao;
-    printf("\n\n");
-    printf("\t\t\t\t    CAMPO MINADO\n\n");
-    // exibir_campo(c);
-    printf("Escolha uma opção: 1 - Informar uma coordenada. 2 - Tempo de jogo. 3 - Desistir do jogo. 4 - Solicitar ajuda.\n");
-    scanf("\n%i", &opcao);
-    if(opcao == 1)
-    {
-        printf("\nInforme uma coordenada: ");
-        scanf("%i %i", &coordenada1, &coordenada2);
-        if (coordenada_valida(coordenada1, coordenada2) == 1)
-        {
-            // printf("verdadeiro\n");
-            abrir_coordenada(c, coordenada1,coordenada2);
-            exibir_campo(c);
-            int g_p = ganhou_perdeu(c);
-
-            if(g_p == 1){
-                printf("Você perdeu!");
-                exit(0);
-            }else if(g_p == 0){
-                printf("Você ganhou!");
-                exit(0);
-            }
-            modo_casual(c,ref_tempo_inicial);
-        }
-        else
-        {
-            printf("Coordenada inválida! (%i %i) Tente novamente.", coordenada1, coordenada2);
-        }
-    }
-    else if(opcao==2)
-    {
-        time_t tempo;
-        struct tm *infoTempo;
-        time(&tempo);
-        infoTempo=localtime(&tempo);
-        float tempo_final = infoTempo->tm_sec+(infoTempo->tm_min*60)+(infoTempo->tm_hour-3)*3600;
-        float *ref_tempo_final = &tempo_final;
-        float tempo_jogo;
-        float *ref_tempo_jogo = &tempo_jogo;
-        calcular_tempo_jogo(ref_tempo_inicial, ref_tempo_final, ref_tempo_jogo);
-        printf("\n");
-        exibir_campo(c);
-        modo_casual(c,ref_tempo_inicial);
-    }
-    else if (opcao==3)
-    {
-        int opcao_saida=5;
-        while (opcao_saida<1 || opcao_saida>2)
-        {
-        printf("\nTem certeza que deseja sair do jogo? Todo seu progresso será apagado. Digite 1 para (Sair do Jogo) e 2 para (Voltar ao Jogo).\n\n");
-        scanf("%i", &opcao_saida);
-        if(opcao_saida == 1)
-        {
-            exit(0);
-            menu(c);
-        }
-        else if(opcao_saida == 2)
-        {
-            printf("Ok! Voltando para o mesmo ponto do jogo...\n");
-
-            exibir_campo(c);
-            modo_casual(c,ref_tempo_inicial);
-            // modo_casual(c,ref_tempo_inicial);
-        }
-        else
-        {
-            opcao_invalida(opcao_saida);
-        }
-        }
-    }
-    else if(opcao == 4)
-    {
-        solicitar_ajuda(c);
-        exibir_campo(c);
-        modo_casual(c,ref_tempo_inicial);
-    }else{
-        opcao_invalida(opcao);
-        exibir_campo(c);
-        modo_casual(c,ref_tempo_inicial);
-    }
-    
-}
-//função que finaliza o jogo se o jogador encontrar 
-//uma mina ou se ele abrir todos os campos sem minas.
-
-//não foi pro git
-int ganhou_perdeu(campo * c){
-    // 0 matriz com bombas 
-    // 1 matriz exibida para o usuário
-    // 2 matriz campo aberto ou fechado
-    // 3 matriz bombas vizinhas
-
-
-    // 1 - perdeu
-    // 0 - ganhou
-    // -1 continua
-
-    for(int linha =0; linha<l_constante; linha++){
-        for(int coluna =0; coluna<c_constante; coluna++){
-            if(c[2].matriz[linha][coluna]== '1' && c[0].matriz[linha][coluna]== 'x'){
-                return 1;
-            }
-        }
-    }
-
-    int cont=0;
-    for(int linha =0; linha<l_constante; linha++){
-        for(int coluna =0; coluna<c_constante; coluna++){
-            if(c[2].matriz[linha][coluna]== '1'){
-                cont++;
-            }
-        }
-    }
-    if(cont == ((l_constante * c_constante) - q_bombas_constante)){
-        return 0;
-    }
-
-    return -1;
-    
-}
-
-
-
-void modo_autonomo(campo *c) {
-//   srand(time(NULL));
-//   int linha_inicial = rand() % 10;
-//   int coluna_inicial = rand() % 20;
-
-//   abrir_coordenada(c, linha_inicial, coluna_inicial);
-//   exibir_campo(c);
-//   int g_p = ganhou_perdeu(c);
-
-//   if (g_p == 1) {
-//     printf("Você perdeu!");
-//     exit(0);
-//   } else if (g_p == 0) {
-//     printf("Você ganhou!");
-//     exit(0);
-//   }
-
-}
 
 void solicitar_ajuda(campo * c){
 
@@ -632,7 +451,368 @@ void solicitar_ajuda(campo * c){
   //}
 }
 
+int ganhou_perdeu(campo * c){
+    // 0 matriz com bombas 
+    // 1 matriz exibida para o usuário
+    // 2 matriz campo aberto ou fechado
+    // 3 matriz bombas vizinhas
 
+
+    // 1 - perdeu
+    // 0 - ganhou
+    // -1 continua
+
+    for(int linha =0; linha<l_constante; linha++){
+        for(int coluna =0; coluna<c_constante; coluna++){
+            if(c[2].matriz[linha][coluna]== '1' && c[0].matriz[linha][coluna]== 'x'){
+                return 1;
+            }
+        }
+    }
+
+    int cont=0;
+    for(int linha =0; linha<l_constante; linha++){
+        for(int coluna =0; coluna<c_constante; coluna++){
+            if(c[2].matriz[linha][coluna]== '1'){
+                cont++;
+            }
+        }
+    }
+    if(cont == ((l_constante * c_constante) - q_bombas_constante)){
+        return 0;
+    }
+
+    return -1;
+    
+}
+
+void identificar_campo_sem_bomba(campo * c)
+{
+    // 0 matriz com bombas 
+    // 1 matriz exibida para o usuário
+    // 2 matriz campo aberto ou fechado
+    // 3 matriz bombas vizinhas
+    int k=0;
+    int coordenada_bombas[40][2];
+    k++;
+    for(int i=0; i<l_constante; i++)
+    {
+        for(int j=0; j<c_constante; j++)
+        {
+            int k_inicio=k;
+            int cont=0;
+            int coordenada_validas=0;
+            if(c[2].matriz[i][j]=='1' && c[3].matriz[i][j]!='0')
+            {
+                if(coordenada_valida(i-1, j-1))
+                {
+                    coordenada_validas++;
+                    if(c[2].matriz[i-1][j-1]=='1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        coordenada_bombas[k][0] = i-1;
+                        coordenada_bombas[k][1] = j-1;
+                        k++;
+                    }
+                }
+                if(coordenada_valida(i-1, j))
+                {
+                    coordenada_validas++;
+                    if(c[2].matriz[i-1][j]=='1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        coordenada_bombas[k][0] = i-1;
+                        coordenada_bombas[k][1] = j;
+                        k++;
+                    }
+                }
+                if(coordenada_valida(i-1, j+1))
+                {
+                    coordenada_validas++;
+                    if(c[2].matriz[i-1][j+1]=='1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        coordenada_bombas[k][0] = i-1;
+                        coordenada_bombas[k][1] = j+1;
+                        k++;
+                    }
+                }
+                if(coordenada_valida(i, j-1))
+                {
+                    coordenada_validas++;
+                    if(c[2].matriz[i][j-1]=='1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        coordenada_bombas[k][0] = i;
+                        coordenada_bombas[k][1] = j-1;
+                        k++;
+                    }
+                }
+                if(coordenada_valida(i, j+1))
+                {
+                    coordenada_validas++;
+                    if(c[2].matriz[i][j+1]=='1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        coordenada_bombas[k][0] = i;
+                        coordenada_bombas[k][1] = j+1;
+                        k++;
+                    }
+                }
+                if(coordenada_valida(i+1, j-1))
+                {
+                    coordenada_validas++;
+                    if(c[2].matriz[i+1][j-1]=='1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        coordenada_bombas[k][0] = i+1;
+                        coordenada_bombas[k][1] = j-1;
+                        k++;
+                    }
+                }
+                if(coordenada_valida(i+1, j))
+                {
+                    coordenada_validas++;
+                    if(c[2].matriz[i+1][j]=='1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        coordenada_bombas[k][0] = i+1;
+                        coordenada_bombas[k][1] = j;
+                        k++;
+                    }
+                }
+                if(coordenada_valida(i+1, j+1))
+                {
+                    coordenada_validas++;
+                    if(c[2].matriz[i+1][j+1]=='1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        coordenada_bombas[k][0] = i+1;
+                        coordenada_bombas[k][1] = j+1;
+                        k++;
+                    }
+                }
+                cont = coordenada_validas-cont;
+                char caractere = cont + '0';
+                if(caractere == c[3].matriz[i][j])
+                {
+                    for(int l=k_inicio; l<k; l++)
+                    {
+                        printf("A coordenada %i %i tem uma bomba.\n", coordenada_bombas[l][0], coordenada_bombas[l][1]);
+                    }
+                }
+                else
+                {
+                    k=k_inicio;
+                }
+                
+            }
+        }
+    }
+}
+void modo_autonomo(campo *c) {
+//   srand(time(NULL));
+//   int linha_inicial = rand() % 10;
+//   int coluna_inicial = rand() % 20;
+
+//   abrir_coordenada(c, linha_inicial, coluna_inicial);
+//   exibir_campo(c);
+//   int g_p = ganhou_perdeu(c);
+
+//   if (g_p == 1) {
+//     printf("Você perdeu!");
+//     exit(0);
+//   } else if (g_p == 0) {
+//     printf("Você ganhou!");
+//     exit(0);
+//   }
+
+}
+
+void modo_casual(campo * c, float *ref_tempo_inicial)
+{
+    int coordenada1, coordenada2,opcao;
+    printf("\n\n");
+    printf("\t\t\t\t    CAMPO MINADO\n\n");
+    // exibir_campo(c);
+    printf("Escolha uma opção: 1 - Informar uma coordenada. 2 - Tempo de jogo. 3 - Desistir do jogo. 4 - Solicitar ajuda.\n");
+    scanf("\n%i", &opcao);
+    if(opcao == 1)
+    {
+        printf("\nInforme uma coordenada: ");
+        scanf("%i %i", &coordenada1, &coordenada2);
+        if (coordenada_valida(coordenada1, coordenada2) == 1)
+        {
+            // printf("verdadeiro\n");
+            abrir_coordenada(c, coordenada1,coordenada2);
+            exibir_campo(c);
+            int g_p = ganhou_perdeu(c);
+
+            if(g_p == 1){
+                printf("Você perdeu!\n");
+                clear(c);
+                cria_campo(c);
+                preenche_campo_minas(c);
+                contar_bombas_vizinhas(c);
+                fechar_campos(c);
+                menu(c);
+            }else if(g_p == 0){
+                printf("Você ganhou!\n");
+                clear(c);
+                cria_campo(c);
+                preenche_campo_minas(c);
+                contar_bombas_vizinhas(c);
+                fechar_campos(c);
+                menu(c);
+            }
+            modo_casual(c,ref_tempo_inicial);
+        }
+        else
+        {
+            printf("Coordenada inválida! (%i %i) Tente novamente.", coordenada1, coordenada2);
+            modo_casual(c,ref_tempo_inicial);
+        }
+    }
+    else if(opcao==2)
+    {
+        time_t tempo;
+        struct tm *infoTempo;
+        time(&tempo);
+        infoTempo=localtime(&tempo);
+        float tempo_final = infoTempo->tm_sec+(infoTempo->tm_min*60)+(infoTempo->tm_hour-3)*3600;
+        float *ref_tempo_final = &tempo_final;
+        float tempo_jogo;
+        float *ref_tempo_jogo = &tempo_jogo;
+        calcular_tempo_jogo(ref_tempo_inicial, ref_tempo_final, ref_tempo_jogo);
+        printf("\n");
+        exibir_campo(c);
+        modo_casual(c,ref_tempo_inicial);
+    }
+    else if (opcao==3)
+    {
+        int opcao_saida=5;
+        while (opcao_saida<1 || opcao_saida>2)
+        {
+        printf("\nTem certeza que deseja sair do jogo? Todo seu progresso será apagado. Digite 1 para (Sair do Jogo) e 2 para (Voltar ao Jogo).\n\n");
+        scanf("%i", &opcao_saida);
+        if(opcao_saida == 1)
+        {
+            clear(c);
+            cria_campo(c);
+            preenche_campo_minas(c);
+            contar_bombas_vizinhas(c);
+            fechar_campos(c);
+            menu(c);
+        }
+        else if(opcao_saida == 2)
+        {
+            printf("Ok! Voltando para o mesmo ponto do jogo...\n");
+
+            exibir_campo(c);
+            modo_casual(c,ref_tempo_inicial);
+            // modo_casual(c,ref_tempo_inicial);
+        }
+        else
+        {
+            opcao_invalida(opcao_saida);
+        }
+        }
+    }
+    else if(opcao == 4)
+    {
+        //solicitar_ajuda(c);
+        identificar_campo_sem_bomba(c);
+        exibir_campo(c);
+        modo_casual(c,ref_tempo_inicial);
+    }else{
+        opcao_invalida(opcao);
+        exibir_campo(c);
+        modo_casual(c,ref_tempo_inicial);
+    }
+    
+}
+//função que finaliza o jogo se o jogador encontrar 
+//uma mina ou se ele abrir todos os campos sem minas.
+
+//não foi pro git
+void menu(campo * c)
+{
+    int opcao;
+    printf("\nOlá! Seja bem-vindo(a) ao Campo Minado.\n\n Por favor, escolha uma opção de 1 a 3. \n 1 - Jogar: Modo Casual\n 2 - Modo Autônomo\n 3 - Sair.\n\n");
+    scanf("%i", &opcao);
+    if (opcao>3 || opcao<1)
+    {
+        opcao_invalida(opcao);
+        menu(c);
+    }
+    else
+    {
+        if (opcao == 1)
+        {
+            printf("\nVocê selecionou a opção (%i). Iniciando Modo Casual... \n\n", opcao);
+            time_t tempo;
+            struct tm *infoTempo;
+            time(&tempo);
+            infoTempo=localtime(&tempo);
+            float tempo_inicial = infoTempo->tm_sec+(infoTempo->tm_min*60)+(infoTempo->tm_hour-3)*3600;
+            float *ref_tempo_inicial = &tempo_inicial;
+            exibir_campo(c);
+            modo_casual(c,ref_tempo_inicial);
+            
+        }
+        else if(opcao == 2)
+        {
+            printf("\nVocê selecionou a opção (%i). Iniciando Modo Autônomo... \n\n", opcao);
+        }
+        else if(opcao == 3)
+        {
+            int opcao_saida=5;
+            while (opcao_saida<1 || opcao_saida>2)
+            {
+                printf("\nTem certeza que deseja sair do programa? Digite 1 para (Sair do Programa) e 2 para (Voltar ao Menu Inicial).\n\n");
+                scanf("%i", &opcao_saida);
+                if(opcao_saida == 1)
+                {
+                    printf("\nVocê selecionou a opção (%i). Encerrando programa... \n\n", opcao);
+                    exit(0);
+                }
+                else if(opcao_saida == 2)
+                {
+                    printf("Ok! Voltando ao Menu Inicial...\n");
+                    menu(c);
+                }
+                else
+                {
+                    opcao_invalida(opcao_saida);
+                }
+            }
+        }
+    }
+}
 
 int main (){
 
