@@ -6,9 +6,10 @@
 #include <time.h>
 #include <locale.h>
 
+
 #define l_constante 10
 #define c_constante 20
-// não foi pro git
+
 #define q_bombas_constante 20
 
 #define ANSI_COLOR_RED "\x1b[31m"
@@ -27,6 +28,12 @@
 // 2 matriz campo aberto ou fechado
 // 3 matriz bombas vizinhas
 // Definição da struct que armazena a matriz
+
+enum finaliza_jogo {
+    ganhou=0, 
+    perdeu=1,
+    continua=-1
+}jogo;
 
 typedef struct
 {
@@ -331,12 +338,27 @@ void calcular_tempo_jogo(float *ref_tempo_inicial, float *ref_tempo_final, float
     {
         printf(" %i Segundos.", segundos);
     }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void solicitar_ajuda(campo *c)
 {
-
-    // printf("oioioi\n");
     //   0 matriz com bombas
     //   1 matriz exibida para o usuário
     //   2 matriz campo aberto ou fechado
@@ -367,8 +389,30 @@ void solicitar_ajuda(campo *c)
     {
         printf("A coordenada %d %d é provável não ter bomba\n", (int)(rand() % 10), (int)(rand() % 20));
     }
-    //---------------------------------------------------------------------
+
+        identificar_campo_sem_bomba(c);
+        int result = abrir_campos(c);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 int ganhou_perdeu(campo *c)
 {
@@ -559,7 +603,7 @@ void identificar_campo_sem_bomba(campo *c)
     }
 }
 
-void abrir_campos(campo *c)
+int abrir_campos(campo *c, int i)
 {
     // 0 matriz com bombas
     // 1 matriz exibida para o usuário
@@ -718,8 +762,14 @@ void abrir_campos(campo *c)
                 {
                     for (int l = 0; l < k; l++)
                     {
-                        printf("abra as coordenadas %i %i\n", coordenada_abrir[l][0], coordenada_abrir[l][1]);
-                        abrir_coordenada(c, coordenada_abrir[l][0], coordenada_abrir[l][1]);
+                        printf("A coordenada %i %i possivelmente não tem bomba\n", coordenada_abrir[l][0], coordenada_abrir[l][1]);
+                        // if(i==0){
+                        return 1;
+                        // }else{
+                        //     abrir_coordenada(c, coordenada_abrir[l][0], coordenada_abrir[l][1]);
+                        // }
+                        
+                        
                     }
                 }
             }
@@ -785,54 +835,69 @@ void modo_autonomo(campo *c)
         }
     }
 
-    while (g_p != 1 || g_p != 0)
-    {
-        g_p = ganhou_perdeu(c);
+    // while(g_p == -1){
 
-        if (g_p == 1)
-        {
-            printf("Você perdeu!\n");
-            // free(c);
-            // cria_campo(c);
-            // preenche_campo_minas(c);
-            // contar_bombas_vizinhas(c);
-            // fechar_campos(c);
-            // menu(c);
-            exit(0);
+    //     solicitar_ajuda(c, 1);
+
+    //     g_p = ganhou_perdeu(c);
+
+    //     if (g_p == 1)
+    //     {
+    //         printf("Você perdeu!\n");
+    //         // free(c);
+    //         // cria_campo(c);
+    //         // preenche_campo_minas(c);
+    //         // contar_bombas_vizinhas(c);
+    //         // fechar_campos(c);
+    //         // menu(c);
+    //         exit(0);
             
-        }
-        else if (g_p == 0)
-        {
-            printf("Você ganhou!\n");
-            // free(c);
-            // cria_campo(c);
-            // preenche_campo_minas(c);
-            // contar_bombas_vizinhas(c);
-            // fechar_campos(c);
-            // menu(c);
-            exit(0);
-        }
-
-        identificar_campo_sem_bomba(c);
-        abrir_campos(c);
-
-        for (int i = 0; i < l_constante; i++)
-        {
-            for (int j = 0; j < c_constante; j++)
-            {
-                printf("%c ", c[4].matriz[i][j]);
-            }
-            printf("\n");
-        }
-        printf("\n");
-        exibir_campo(c);
-    }
-    printf("oioio\n");
+    //     }
+    //     else if (g_p == 0)
+    //     {
+    //         printf("Você ganhou!\n");
+    //         // free(c);
+    //         // cria_campo(c);
+    //         // preenche_campo_minas(c);
+    //         // contar_bombas_vizinhas(c);
+    //         // fechar_campos(c);
+    //         // menu(c);
+    //         exit(0);
+    //     }
+    // }
+    
+    
     
 }
+
+void variacao_inicia_numero(campo *c, int linha_cord, int coluna_cord, int variacao){
+    
+    if(variacao == 1){
+
+        while(c[0].matriz[linha_cord][coluna_cord] == 'x' || c[3].matriz[linha_cord][coluna_cord] == '0'){
+            preenche_campo_minas(c);
+            contar_bombas_vizinhas(c);
+        }
+        
+
+    }else if(variacao == 2){
+        
+        while(c[0].matriz[linha_cord][coluna_cord] == 'x' && c[3].matriz[linha_cord][coluna_cord] != ' '){
+            preenche_campo_minas(c);
+            contar_bombas_vizinhas(c); 
+        }
+        printf("Você iniciou na coordenada 0 0 =)");
+        
+    }
+
+    
+}
+
+
 void modo_casual(campo *c, float *ref_tempo_inicial)
 {
     int coordenada1, coordenada2, opcao;
+    int contador_jogadas=0;
     printf("\n\n");
     printf("\t\t\t\t    CAMPO MINADO\n\n");
     // exibir_campo(c);
@@ -840,28 +905,67 @@ void modo_casual(campo *c, float *ref_tempo_inicial)
     scanf("\n%i", &opcao);
     if (opcao == 1)
     {
-        printf("\nInforme uma coordenada: ");
-        scanf("%i %i", &coordenada1, &coordenada2);
+
+            int linha_cord, coluna_cord=0;
+            int contador_fechado=0;
+            int opcao_variacao=0;
+
+            for(int linha=0; linha<l_constante;linha++){
+                for(int coluna=0; coluna<c_constante;coluna++){
+                    if(c[2].matriz[linha][coluna]=='0'){
+                        contador_fechado++;
+                    }
+                }
+            }
+            if(contador_fechado == (l_constante*c_constante)){
+                printf("1 - Iniciar com um número. 2 - Iniciar com um campo vazio. 3 - Jogar normalmente\n");
+                scanf("%d", &opcao_variacao);
+
+                if(opcao_variacao == 1 || opcao_variacao == 2){
+                    
+                    variacao_inicia_numero(c, 0, 0, opcao_variacao);
+                    coordenada1=linha_cord;
+                    coordenada2=coluna_cord;
+                }else if(opcao_variacao == 3){
+                    printf("\nInforme uma coordenada: ");
+                    scanf("%i %i", &coordenada1, &coordenada2);
+                }
+                
+            }else{
+                printf("\nInforme uma coordenada: ");
+                scanf("%i %i", &coordenada1, &coordenada2);
+            }
+
+
+
+        // printf("\nInforme uma coordenada: ");
+        // scanf("%i %i", &coordenada1, &coordenada2);
         if (coordenada_valida(coordenada1, coordenada2) == 1)
         {
             // printf("verdadeiro\n");
+
             abrir_coordenada(c, coordenada1, coordenada2);
+            contador_jogadas++;
             exibir_campo(c);
+
             int g_p = ganhou_perdeu(c);
 
-            if (g_p == 1)
+            if (g_p == perdeu)
             {
                 printf("Você perdeu!\n");
+                gera_arquivo(contador_jogadas);
                 free(c);
                 cria_campo(c);
                 preenche_campo_minas(c);
                 contar_bombas_vizinhas(c);
                 fechar_campos(c);
                 menu(c);
+                
             }
-            else if (g_p == 0)
+            else if (g_p == ganhou)
             {
                 printf("Você ganhou!\n");
+                gera_arquivo(contador_jogadas);
                 free(c);
                 cria_campo(c);
                 preenche_campo_minas(c);
@@ -924,9 +1028,9 @@ void modo_casual(campo *c, float *ref_tempo_inicial)
     }
     else if (opcao == 4)
     {
-        // solicitar_ajuda(c);
-        identificar_campo_sem_bomba(c);
-        exibir_campo(c);
+        solicitar_ajuda(c);
+        // identificar_campo_sem_bomba(c);
+        // exibir_campo(c);
         modo_casual(c, ref_tempo_inicial);
     }
     else
@@ -993,6 +1097,23 @@ void menu(campo *c)
             }
         }
     }
+}
+
+void gera_arquivo(int jogadas){
+    FILE * pont_arq;
+
+    pont_arq = fopen("tempofinal.txt", "a");
+
+    fclose(pont_arq);
+
+    fopen("tempofinal.txt", "w");
+
+    fprintf(pont_arq, "Quantidade de jogadas:\n");
+    fprintf(pont_arq, "%d", jogadas+1);
+    fclose(pont_arq);
+
+    printf("O arquivo foi criado com sucesso!");
+
 }
 
 int main()
