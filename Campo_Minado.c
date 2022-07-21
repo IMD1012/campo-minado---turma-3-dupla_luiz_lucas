@@ -9,7 +9,7 @@
 #define l_constante 10
 #define c_constante 20
 // não foi pro git
-#define q_bombas_constante 40
+#define q_bombas_constante 20
 
 #define ANSI_COLOR_RED "\x1b[31m"
 #define ANSI_COLOR_GRAY "\e[0;37m"
@@ -51,6 +51,7 @@ void cria_campo(campo *c)
     c[1].matriz = calloc(l_constante, sizeof(char *));
     c[2].matriz = calloc(l_constante, sizeof(char *));
     c[3].matriz = calloc(l_constante, sizeof(char *));
+    c[4].matriz = calloc(l_constante, sizeof(char *));
 
     for (int linha = 0; linha < 10; linha++)
     {
@@ -58,6 +59,7 @@ void cria_campo(campo *c)
         c[1].matriz[linha] = calloc(c_constante, sizeof(char));
         c[2].matriz[linha] = calloc(c_constante, sizeof(char));
         c[3].matriz[linha] = calloc(c_constante, sizeof(char));
+        c[4].matriz[linha] = calloc(c_constante, sizeof(char));
     }
 
     // Adiciona um espaço inicial em todas as posições
@@ -69,6 +71,7 @@ void cria_campo(campo *c)
             c[1].matriz[linha][coluna] = ' ';
             c[2].matriz[linha][coluna] = ' ';
             c[3].matriz[linha][coluna] = ' ';
+            c[4].matriz[linha][coluna] = ' ';
         }
     }
     // Define que tordos os campos inicialmente estão fechados
@@ -77,6 +80,7 @@ void cria_campo(campo *c)
         for (int coluna = 0; coluna < c_constante; coluna++)
         {
             c[2].matriz[linha][coluna] = '0';
+            c[4].matriz[linha][coluna] = '0';
         }
     }
 }
@@ -329,136 +333,43 @@ void calcular_tempo_jogo(float *ref_tempo_inicial, float *ref_tempo_final, float
     }
 }
 
-void menu(campo *c)
+void solicitar_ajuda(campo *c)
 {
-    int opcao;
 
-    printf("\nOlá! Seja bem-vindo(a) ao Campo Minado.\n\n Por favor, escolha uma opção de 1 a 3. \n 1 - Jogar: Modo Casual\n 2 - Modo Autônomo\n 3 - Sair.\n\n");
-    scanf("%i", &opcao);
-    if (opcao > 3 || opcao < 1)
+    // printf("oioioi\n");
+    //   0 matriz com bombas
+    //   1 matriz exibida para o usuário
+    //   2 matriz campo aberto ou fechado
+    //   3 matriz bombas vizinhas
+
+    //   1 - perdeu
+    //   0 - ganhou
+    //   -1 continua
+
+    //   Se todos os campos estiverem fechados as coodenadas são aleatórias
+
+    // Funcionando
+    srand(time(NULL));
+
+    int cont_todos_campos_fechados = 0;
+    for (int linha = 0; linha < l_constante; linha++)
     {
-        opcao_invalida(opcao);
-        menu(c);
-    }
-    else
-    {
-        if (opcao == 1)
+        for (int coluna = 0; coluna < c_constante; coluna++)
         {
-            printf("\nVocê selecionou a opção (%i). Iniciando Modo Casual... \n\n", opcao);
-            time_t tempo;
-            struct tm *infoTempo;
-            time(&tempo);
-            infoTempo = localtime(&tempo);
-            float tempo_inicial = infoTempo->tm_sec + (infoTempo->tm_min * 60) + (infoTempo->tm_hour - 3) * 3600;
-            float *ref_tempo_inicial = &tempo_inicial;
-            exibir_campo(c);
-            modo_casual(c, ref_tempo_inicial);
-        }
-        else if (opcao == 2)
-        {
-            printf("\nVocê selecionou a opção (%i). Iniciando Modo Autônomo... \n\n", opcao);
-        }
-        else if (opcao == 3)
-        {
-            printf("\nVocê selecionou a opção (%i). Encerrando programa... \n\n", opcao);
-            exit(0);
+            if (c[2].matriz[linha][coluna] == '0')
+            {
+                cont_todos_campos_fechados++;
+            }
         }
     }
+
+    if (cont_todos_campos_fechados == (l_constante * c_constante))
+    {
+        printf("A coordenada %d %d é provável não ter bomba\n", (int)(rand() % 10), (int)(rand() % 20));
+    }
+    //---------------------------------------------------------------------
 }
-void modo_casual(campo *c, float *ref_tempo_inicial)
-{
-    int coordenada1, coordenada2, opcao;
-    printf("\n\n");
-    printf("\t\t\t\t    CAMPO MINADO\n\n");
-    // exibir_campo(c);
-    printf("Escolha uma opção: 1 - Informar uma coordenada. 2 - Tempo de jogo. 3 - Desistir do jogo. 4 - Solicitar ajuda.\n");
-    scanf("\n%i", &opcao);
-    if (opcao == 1)
-    {
-        printf("\nInforme uma coordenada: ");
-        scanf("%i %i", &coordenada1, &coordenada2);
-        if (coordenada_valida(coordenada1, coordenada2) == 1)
-        {
-            // printf("verdadeiro\n");
-            abrir_coordenada(c, coordenada1, coordenada2);
-            exibir_campo(c);
-            int g_p = ganhou_perdeu(c);
 
-            if (g_p == 1)
-            {
-                printf("Você perdeu!");
-                exit(0);
-            }
-            else if (g_p == 0)
-            {
-                printf("Você ganhou!");
-                exit(0);
-            }
-            modo_casual(c, ref_tempo_inicial);
-        }
-        else
-        {
-            printf("Coordenada inválida! (%i %i) Tente novamente.", coordenada1, coordenada2);
-        }
-    }
-    else if (opcao == 2)
-    {
-        time_t tempo;
-        struct tm *infoTempo;
-        time(&tempo);
-        infoTempo = localtime(&tempo);
-        float tempo_final = infoTempo->tm_sec + (infoTempo->tm_min * 60) + (infoTempo->tm_hour - 3) * 3600;
-        float *ref_tempo_final = &tempo_final;
-        float tempo_jogo;
-        float *ref_tempo_jogo = &tempo_jogo;
-        calcular_tempo_jogo(ref_tempo_inicial, ref_tempo_final, ref_tempo_jogo);
-        printf("\n");
-        exibir_campo(c);
-        modo_casual(c, ref_tempo_inicial);
-    }
-    else if (opcao == 3)
-    {
-        int opcao_saida = 5;
-        while (opcao_saida < 1 || opcao_saida > 2)
-        {
-            printf("\nTem certeza que deseja sair do jogo? Todo seu progresso será apagado. Digite 1 para (Sair do Jogo) e 2 para (Voltar ao Jogo).\n\n");
-            scanf("%i", &opcao_saida);
-            if (opcao_saida == 1)
-            {
-                exit(0);
-                menu(c);
-            }
-            else if (opcao_saida == 2)
-            {
-                printf("Ok! Voltando para o mesmo ponto do jogo...\n");
-
-                exibir_campo(c);
-                modo_casual(c, ref_tempo_inicial);
-                // modo_casual(c,ref_tempo_inicial);
-            }
-            else
-            {
-                opcao_invalida(opcao_saida);
-            }
-        }
-    }
-    else if (opcao == 4)
-    {
-        solicitar_ajuda(c);
-        exibir_campo(c);
-        modo_casual(c, ref_tempo_inicial);
-    }
-    else
-    {
-        opcao_invalida(opcao);
-        exibir_campo(c);
-        modo_casual(c, ref_tempo_inicial);
-    }
-}
-// função que finaliza o jogo se o jogador encontrar
-// uma mina ou se ele abrir todos os campos sem minas.
-
-// não foi pro git
 int ganhou_perdeu(campo *c)
 {
     // 0 matriz com bombas
@@ -500,326 +411,596 @@ int ganhou_perdeu(campo *c)
     return -1;
 }
 
+void identificar_campo_sem_bomba(campo *c)
+{
+    // 0 matriz com bombas
+    // 1 matriz exibida para o usuário
+    // 2 matriz campo aberto ou fechado
+    // 3 matriz bombas vizinhas
+    int k = 0;
+    int coordenada_bombas[40][2];
+
+    for (int i = 0; i < l_constante; i++)
+    {
+        for (int j = 0; j < c_constante; j++)
+        {
+            int k_inicio = k;
+            int cont = 0;
+            int coordenada_validas = 0;
+            if (c[2].matriz[i][j] == '1' && c[3].matriz[i][j] != '0')
+            {
+                if (coordenada_valida(i - 1, j - 1))
+                {
+                    coordenada_validas++;
+                    if (c[2].matriz[i - 1][j - 1] == '1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        coordenada_bombas[k][0] = i - 1;
+                        coordenada_bombas[k][1] = j - 1;
+                        k++;
+                    }
+                }
+                if (coordenada_valida(i - 1, j))
+                {
+                    coordenada_validas++;
+                    if (c[2].matriz[i - 1][j] == '1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        coordenada_bombas[k][0] = i - 1;
+                        coordenada_bombas[k][1] = j;
+                        k++;
+                    }
+                }
+                if (coordenada_valida(i - 1, j + 1))
+                {
+                    coordenada_validas++;
+                    if (c[2].matriz[i - 1][j + 1] == '1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        coordenada_bombas[k][0] = i - 1;
+                        coordenada_bombas[k][1] = j + 1;
+                        k++;
+                    }
+                }
+                if (coordenada_valida(i, j - 1))
+                {
+                    coordenada_validas++;
+                    if (c[2].matriz[i][j - 1] == '1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        coordenada_bombas[k][0] = i;
+                        coordenada_bombas[k][1] = j - 1;
+                        k++;
+                    }
+                }
+                if (coordenada_valida(i, j + 1))
+                {
+                    coordenada_validas++;
+                    if (c[2].matriz[i][j + 1] == '1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        coordenada_bombas[k][0] = i;
+                        coordenada_bombas[k][1] = j + 1;
+                        k++;
+                    }
+                }
+                if (coordenada_valida(i + 1, j - 1))
+                {
+                    coordenada_validas++;
+                    if (c[2].matriz[i + 1][j - 1] == '1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        coordenada_bombas[k][0] = i + 1;
+                        coordenada_bombas[k][1] = j - 1;
+                        k++;
+                    }
+                }
+                if (coordenada_valida(i + 1, j))
+                {
+                    coordenada_validas++;
+                    if (c[2].matriz[i + 1][j] == '1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        coordenada_bombas[k][0] = i + 1;
+                        coordenada_bombas[k][1] = j;
+                        k++;
+                    }
+                }
+                if (coordenada_valida(i + 1, j + 1))
+                {
+                    coordenada_validas++;
+                    if (c[2].matriz[i + 1][j + 1] == '1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        coordenada_bombas[k][0] = i + 1;
+                        coordenada_bombas[k][1] = j + 1;
+                        k++;
+                    }
+                }
+                cont = coordenada_validas - cont;
+                char caractere = cont + '0';
+                if (caractere == c[3].matriz[i][j])
+                {
+                    for (int l = k_inicio; l < k; l++)
+                    {
+                        c[4].matriz[coordenada_bombas[l][0]][coordenada_bombas[l][1]] = '1';
+                    }
+                }
+                else
+                {
+                    k = k_inicio;
+                }
+            }
+        }
+    }
+}
+
+void abrir_campos(campo *c)
+{
+    // 0 matriz com bombas
+    // 1 matriz exibida para o usuário
+    // 2 matriz campo aberto ou fechado
+    // 3 matriz bombas vizinhas
+    // 4 matriz bombas descobertas
+
+    for (int i = 0; i < l_constante; i++)
+    {
+        for (int j = 0; j < c_constante; j++)
+        {
+            int k = 0;
+            int cont = 0;
+            int coordenada_validas = 0;
+            int coordenada_abrir[100][2];
+            if (c[2].matriz[i][j] == '1' && c[3].matriz[i][j] != '0')
+            {
+                if (coordenada_valida(i - 1, j - 1))
+                {
+                    coordenada_validas++;
+                    if (c[4].matriz[i - 1][j - 1] == '1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        if (c[2].matriz[i - 1][j - 1] == '0')
+                        {
+                            coordenada_abrir[k][0] = i - 1;
+                            coordenada_abrir[k][1] = j - 1;
+                            k++;
+                        }
+                    }
+                }
+                if (coordenada_valida(i - 1, j))
+                {
+                    coordenada_validas++;
+                    if (c[4].matriz[i - 1][j] == '1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        if (c[2].matriz[i - 1][j] == '0')
+                        {
+                            coordenada_abrir[k][0] = i - 1;
+                            coordenada_abrir[k][1] = j;
+                            k++;
+                        }
+                    }
+                }
+                if (coordenada_valida(i - 1, j + 1))
+                {
+                    coordenada_validas++;
+                    if (c[4].matriz[i - 1][j + 1] == '1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        if (c[2].matriz[i - 1][j + 1] == '0')
+                        {
+                            coordenada_abrir[k][0] = i - 1;
+                            coordenada_abrir[k][1] = j + 1;
+                            k++;
+                        }
+                    }
+                }
+                if (coordenada_valida(i, j - 1))
+                {
+                    coordenada_validas++;
+                    if (c[4].matriz[i][j - 1] == '1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        if (c[2].matriz[i][j - 1] == '0')
+                        {
+                            coordenada_abrir[k][0] = i;
+                            coordenada_abrir[k][1] = j - 1;
+                            k++;
+                        }
+                    }
+                }
+                if (coordenada_valida(i, j + 1))
+                {
+                    coordenada_validas++;
+                    if (c[4].matriz[i][j + 1] == '1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        if (c[2].matriz[i][j + 1] == '0')
+                        {
+                            coordenada_abrir[k][0] = i;
+                            coordenada_abrir[k][1] = j + 1;
+                            k++;
+                        }
+                    }
+                }
+                if (coordenada_valida(i + 1, j - 1))
+                {
+                    coordenada_validas++;
+                    if (c[4].matriz[i + 1][j - 1] == '1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        if (c[2].matriz[i + 1][j - 1] == '0')
+                        {
+                            coordenada_abrir[k][0] = i + 1;
+                            coordenada_abrir[k][1] = j - 1;
+                            k++;
+                        }
+                    }
+                }
+                if (coordenada_valida(i + 1, j))
+                {
+                    coordenada_validas++;
+                    if (c[4].matriz[i + 1][j] == '1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        if (c[2].matriz[i + 1][j] == '0')
+                        {
+                            coordenada_abrir[k][0] = i + 1;
+                            coordenada_abrir[k][1] = j;
+                            k++;
+                        }
+                    }
+                }
+                if (coordenada_valida(i + 1, j + 1))
+                {
+                    coordenada_validas++;
+                    if (c[4].matriz[i + 1][j + 1] == '1')
+                    {
+                        cont++;
+                    }
+                    else
+                    {
+                        if (c[2].matriz[i + 1][j + 1] == '0')
+                        {
+                            coordenada_abrir[k][0] = i + 1;
+                            coordenada_abrir[k][1] = j + 1;
+                            k++;
+                        }
+                    }
+                }
+                char caractere = cont + '0';
+                if (caractere == c[3].matriz[i][j])
+                {
+                    for (int l = 0; l < k; l++)
+                    {
+                        printf("abra as coordenadas %i %i\n", coordenada_abrir[l][0], coordenada_abrir[l][1]);
+                        abrir_coordenada(c, coordenada_abrir[l][0], coordenada_abrir[l][1]);
+                    }
+                }
+            }
+        }
+    }
+}
+
 void modo_autonomo(campo *c)
 {
-    //   srand(time(NULL));
-    //   int linha_inicial = rand() % 10;
-    //   int coluna_inicial = rand() % 20;
-
-    //   abrir_coordenada(c, linha_inicial, coluna_inicial);
-    //   exibir_campo(c);
-    //   int g_p = ganhou_perdeu(c);
-
-    //   if (g_p == 1) {
-    //     printf("Você perdeu!");
-    //     exit(0);
-    //   } else if (g_p == 0) {
-    //     printf("Você ganhou!");
-    //     exit(0);
-    //   }
-}
-
-void solicitar_ajuda(campo *c)
-{
-    // printf("oioioi\n");
-    //   0 matriz com bombas
-    //   1 matriz exibida para o usuário
-    //   2 matriz campo aberto ou fechado
-    //   3 matriz bombas vizinhas
-
-    //   1 - perdeu
-    //   0 - ganhou
-    //   -1 continua
-
-    // Se todos os campos estiverem fechados as coodenadas são aleatórias
-
-    int cont = 0;
-    int v_ou_f_1 = 0;
-    int indices_bombas[q_bombas_constante][2];
-    int cont1 = 0;
-    int c_1, c_2, c_3, c_4, c_5, c_6, c_7, c_8 = 0;
-    
+    int s_ou_n = 0;
+    int g_p = -1;
     srand(time(NULL));
 
-    // fazer alocação dinâmica para o vetor ficar sempre o menor possível
-    // indices_bombas = calloc(1, sizeof(int*));
-    // for(int i=0; i < 2; i++){
-    //     indices_bombas[i] = calloc(2, sizeof(int));
-    // }
-
-    // Funcionando
-    int cont_todos_campos_fechados = 0;
-    for (int linha = 0; linha < l_constante; linha++)
+    while (s_ou_n <= 4)
     {
-        for (int coluna = 0; coluna < c_constante; coluna++)
+
+        s_ou_n = 0;
+
+        int linha_coordenada = rand() % 10;
+        int coluna_coordenada = rand() % 20;
+
+        // printf("%d %d", linha_coordenada, coluna_coordenada);
+        if (c[2].matriz[linha_coordenada][coluna_coordenada] == '0')
         {
-            if (c[2].matriz[linha][coluna] == '0')
-            {
-                cont_todos_campos_fechados++;
-            }
+            abrir_coordenada(c, linha_coordenada, coluna_coordenada);
+            exibir_campo(c);
+            g_p = ganhou_perdeu(c);
+
+        if (g_p == 1)
+        {
+            printf("Você perdeu!\n");
+            // free(c);
+            // cria_campo(c);
+            // preenche_campo_minas(c);
+            // contar_bombas_vizinhas(c);
+            // fechar_campos(c);
+            // menu(c);
+            exit(0);
+            
         }
-    }
-
-    if (cont_todos_campos_fechados == (l_constante * c_constante))
-    {
-        printf("A coordenada %d %d é provável não ter bomba\n", (int)(rand() % 10), (int)(rand() % 20));
-        v_ou_f_1++;
-    }
-    //--------------------------------------------------------------------------------------------------
-
-    if (v_ou_f_1 == 0)
-    {
+        else if (g_p == 0)
+        {
+            printf("Você ganhou!\n");
+            // free(c);
+            // cria_campo(c);
+            // preenche_campo_minas(c);
+            // contar_bombas_vizinhas(c);
+            // fechar_campos(c);
+            // menu(c);
+            exit(0);
+        }
+        }
 
         for (int linha = 0; linha < l_constante; linha++)
         {
-            for (int coluna = 0; coluna < c_constante; coluna++)
+            for (int coluna = 0; coluna < l_constante; coluna++)
             {
-
-                if (c[2].matriz[linha][coluna] == '1' && c[3].matriz[linha][coluna] == '1')
+                if (c[2].matriz[linha][coluna] == '1')
                 {
-
-                    if (coordenada_valida(linha-1, coluna) && c[2].matriz[linha - 1][coluna] == '1')
-                    {
-                        cont++;
-                        c_1++;
-                    }
-                    if (coordenada_valida(linha+1, coluna) && c[2].matriz[linha + 1][coluna] == '1')
-                    {
-                        cont++;
-                        c_2++;
-                    }
-                    if (coordenada_valida(linha, coluna-1) && c[2].matriz[linha][coluna - 1] == '1')
-                    {
-                        cont++;
-                        c_3++;
-                    }
-                    if (coordenada_valida(linha, coluna+1) && c[2].matriz[linha][coluna + 1] == '1')
-                    {
-                        cont++;
-                        c_4++;
-                    }
-
-                    if (coordenada_valida(linha-1, coluna-1) && c[2].matriz[linha - 1][coluna - 1] == '1')
-                    {
-                        cont++;
-                        c_5++;
-                    }
-                    if (coordenada_valida(linha-1, coluna+1) && c[2].matriz[linha - 1][coluna + 1] == '1')
-                    {
-                        cont++;
-                        c_6++;
-                    }
-                    if (coordenada_valida(linha+1, coluna-1) && c[2].matriz[linha + 1][coluna - 1] == '1')
-                    {
-                        cont++;
-                        c_7++;
-                    }
-                    if (coordenada_valida(linha+1, coluna+1) && c[2].matriz[linha + 1][coluna + 1] == '1')
-                    {
-                        cont++;
-                        c_8++;
-                    }
-                }
-
-                
-
-                if (cont == 7)
-                {
-
-                    if (c_1 == 0 && c[2].matriz[linha - 1][coluna] == '0')
-                    {
-                        indices_bombas[cont1][0] = linha - 1;
-                        indices_bombas[cont1][1] = coluna;
-                        
-                        cont1++;
-                    }
-
-                    if (c_2 == 0 && c[2].matriz[linha + 1][coluna] == '0')
-                    {
-                        indices_bombas[cont1][0] = linha + 1;
-                        indices_bombas[cont1][1] = coluna;
-                        
-                        cont1++;
-                    }
-
-                    if (c_3 == 0 && c[2].matriz[linha][coluna+1] == '0')
-                    {
-                        indices_bombas[cont1][0] = linha;
-                        indices_bombas[cont1][1] = coluna + 1;
-                       
-                        cont1++;
-                    }
-
-                    if (c_4 == 0 && c[2].matriz[linha][coluna-1] == '0')
-                    {
-                        indices_bombas[cont1][0] = linha;
-                        indices_bombas[cont1][1] = coluna - 1;
-                        
-                        cont1++;
-                    }
-
-                    if (c_5 == 0 && c[2].matriz[linha - 1][coluna-1] == '0')
-                    {
-                        indices_bombas[cont1][0] = linha - 1;
-                        indices_bombas[cont1][1] = coluna - 1;
-                       
-                        cont1++;
-                    }
-
-                    if (c_6 == 0 && c[2].matriz[linha - 1][coluna+1] == '0')
-                    {
-                        indices_bombas[cont1][0] = linha - 1;
-                        indices_bombas[cont1][1] = coluna + 1;
-                        
-                        cont1++;
-                    }
-
-                    if (c_7 == 0 && c[2].matriz[linha + 1][coluna - 1] == '0')
-                    {
-                        indices_bombas[cont1][0] = linha + 1;
-                        indices_bombas[cont1][1] = coluna - 1;
-                       
-                        cont1++;
-                    }
-
-                    if (c_8 == 0 && c[2].matriz[linha + 1][coluna + 1] == '0')
-                    {
-                        indices_bombas[cont1][0] = linha + 1;
-                        indices_bombas[cont1][1] = coluna + 1;
-                        
-                        cont1++;
-                    }
-                }
-                cont=0;
-                c_1=0;
-                c_2=0;
-                c_3=0;
-                c_4=0;
-                c_5=0;
-                c_6=0;
-                c_7=0;
-                c_8=0;
-            }
-        }
-        printf("índices com bomba certeza:\n");
-
-        for(int i=0; i< cont1;i++){
-            printf("%d %d\n", indices_bombas[i][0], indices_bombas[i][1]);
-        }
-        printf("Fim\n");
-
-
-        for (int linha = 0; linha < l_constante; linha++)
-        {
-            for (int coluna = 0; coluna < c_constante; coluna++)
-            {
-                for (int i = 0; i < cont1; i++)
-                {
-                    if (linha == indices_bombas[i][0] && coluna == indices_bombas[i][1])
-                    {
-                        if (coordenada_valida(linha-1, coluna) && c[3].matriz[linha - 1][coluna] == '1')
-                        {
-                            printf("%d %d\n", linha-1, coluna);
-                            abrir_campo_sem_mina(c, linha - 1, coluna, linha, coluna);
-                        }
-                        if (coordenada_valida(linha+1, coluna) && c[3].matriz[linha + 1][coluna] == '1')
-                        {
-                            printf("%d %d\n", linha+1, coluna);
-                            abrir_campo_sem_mina(c, linha + 1, coluna, linha, coluna);
-                        }
-                        if (coordenada_valida(linha, coluna-1) && c[3].matriz[linha][coluna - 1] == '1')
-                        {
-                            printf("%d %d\n", linha, coluna-1);
-                            abrir_campo_sem_mina(c, linha, coluna - 1, linha, coluna);
-                        }
-                        if (coordenada_valida(linha, coluna+1) && c[3].matriz[linha][coluna + 1] == '1')
-                        {
-                            printf("%d %d\n", linha, coluna+1);
-                            abrir_campo_sem_mina(c, linha, coluna + 1, linha, coluna);
-                        }
-                        if (coordenada_valida(linha-1, coluna-1) && c[3].matriz[linha - 1][coluna - 1] == '1')
-                        {
-                            printf("%d %d\n", linha-1, coluna-1);
-                            abrir_campo_sem_mina(c, linha - 1, coluna - 1, linha, coluna);
-                        }
-                        if (coordenada_valida(linha-1, coluna+1) && c[3].matriz[linha - 1][coluna + 1] == '1')
-                        {
-                            printf("%d %d\n", linha-1, coluna+1);
-                            abrir_campo_sem_mina(c, linha - 1, coluna + 1, linha, coluna);
-                        }
-                        if (coordenada_valida(linha+1, coluna-1) && c[3].matriz[linha + 1][coluna - 1] == '1')
-                        {
-                            printf("%d %d\n", linha+1, coluna-1);
-                            abrir_campo_sem_mina(c, linha + 1, coluna - 1, linha, coluna);
-                        }
-                        if (coordenada_valida(linha+1, coluna+1) && c[3].matriz[linha + 1][coluna + 1] == '1')
-                        {
-                            printf("%d %d\n", linha+1, coluna+1);
-                            abrir_campo_sem_mina(c, linha + 1, coluna + 1, linha, coluna);
-                        }
-                    }
+                    s_ou_n++;
                 }
             }
         }
     }
+
+    while (g_p != 1 || g_p != 0)
+    {
+        g_p = ganhou_perdeu(c);
+
+        if (g_p == 1)
+        {
+            printf("Você perdeu!\n");
+            // free(c);
+            // cria_campo(c);
+            // preenche_campo_minas(c);
+            // contar_bombas_vizinhas(c);
+            // fechar_campos(c);
+            // menu(c);
+            exit(0);
+            
+        }
+        else if (g_p == 0)
+        {
+            printf("Você ganhou!\n");
+            // free(c);
+            // cria_campo(c);
+            // preenche_campo_minas(c);
+            // contar_bombas_vizinhas(c);
+            // fechar_campos(c);
+            // menu(c);
+            exit(0);
+        }
+
+        identificar_campo_sem_bomba(c);
+        abrir_campos(c);
+
+        for (int i = 0; i < l_constante; i++)
+        {
+            for (int j = 0; j < c_constante; j++)
+            {
+                printf("%c ", c[4].matriz[i][j]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+        exibir_campo(c);
+    }
+    printf("oioio\n");
+    
 }
-
-void abrir_campo_sem_mina(campo * c, int linha_com_um, int coluna_com_um, int linha_bomba, int coluna_bomba)
+void modo_casual(campo *c, float *ref_tempo_inicial)
 {
+    int coordenada1, coordenada2, opcao;
+    printf("\n\n");
+    printf("\t\t\t\t    CAMPO MINADO\n\n");
+    // exibir_campo(c);
+    printf("Escolha uma opção: 1 - Informar uma coordenada. 2 - Tempo de jogo. 3 - Desistir do jogo. 4 - Solicitar ajuda.\n");
+    scanf("\n%i", &opcao);
+    if (opcao == 1)
+    {
+        printf("\nInforme uma coordenada: ");
+        scanf("%i %i", &coordenada1, &coordenada2);
+        if (coordenada_valida(coordenada1, coordenada2) == 1)
+        {
+            // printf("verdadeiro\n");
+            abrir_coordenada(c, coordenada1, coordenada2);
+            exibir_campo(c);
+            int g_p = ganhou_perdeu(c);
 
-    // printf("entreiii\n");
-    // if (coordenada_valida(linha_com_um - 1, coluna_com_um) && c[2].matriz[linha_com_um - 1][coluna_com_um] == '0' && (linha_com_um - 1) != linha_bomba && coluna_com_um != coluna_bomba)
-    // {
-    //     printf("%d %d\n", linha_com_um - 1, coluna_com_um);
-    //     abrir_coordenada(c, linha_com_um - 1, coluna_com_um);
-    // }
-    // if (coordenada_valida(linha_com_um + 1, coluna_com_um) && c[2].matriz[linha_com_um + 1][coluna_com_um] == '0' && (linha_com_um + 1) != linha_bomba && coluna_com_um != coluna_bomba)
-    // {
-    //     printf("%d %d\n", linha_com_um + 1, coluna_com_um);
-    //     abrir_coordenada(c, linha_com_um + 1, coluna_com_um);
-    // }
-    // if (coordenada_valida(linha_com_um, coluna_com_um - 1) && c[2].matriz[linha_com_um][coluna_com_um - 1] == '0' && linha_com_um != linha_bomba && (coluna_com_um - 1) != coluna_bomba)
-    // {
-    //     printf("%d %d\n", linha_com_um, coluna_com_um - 1);
-    //     abrir_coordenada(c, linha_com_um, coluna_com_um - 1);
-    // }
-    // if (coordenada_valida(linha_com_um, coluna_com_um + 1) && c[2].matriz[linha_com_um][coluna_com_um + 1] == '0' && linha_com_um != linha_bomba && (coluna_com_um + 1) != coluna_bomba)
-    // {
-    //     printf("%d %d\n", linha_com_um, coluna_com_um + 1);
-    //     abrir_coordenada(c, linha_com_um, coluna_com_um + 1);
-    // }
+            if (g_p == 1)
+            {
+                printf("Você perdeu!\n");
+                free(c);
+                cria_campo(c);
+                preenche_campo_minas(c);
+                contar_bombas_vizinhas(c);
+                fechar_campos(c);
+                menu(c);
+            }
+            else if (g_p == 0)
+            {
+                printf("Você ganhou!\n");
+                free(c);
+                cria_campo(c);
+                preenche_campo_minas(c);
+                contar_bombas_vizinhas(c);
+                fechar_campos(c);
+                menu(c);
+            }
+            modo_casual(c, ref_tempo_inicial);
+        }
+        else
+        {
+            printf("Coordenada inválida! (%i %i) Tente novamente.", coordenada1, coordenada2);
+            modo_casual(c, ref_tempo_inicial);
+        }
+    }
+    else if (opcao == 2)
+    {
+        time_t tempo;
+        struct tm *infoTempo;
+        time(&tempo);
+        infoTempo = localtime(&tempo);
+        float tempo_final = infoTempo->tm_sec + (infoTempo->tm_min * 60) + (infoTempo->tm_hour - 3) * 3600;
+        float *ref_tempo_final = &tempo_final;
+        float tempo_jogo;
+        float *ref_tempo_jogo = &tempo_jogo;
+        calcular_tempo_jogo(ref_tempo_inicial, ref_tempo_final, ref_tempo_jogo);
+        printf("\n");
+        exibir_campo(c);
+        modo_casual(c, ref_tempo_inicial);
+    }
+    else if (opcao == 3)
+    {
+        int opcao_saida = 5;
+        while (opcao_saida < 1 || opcao_saida > 2)
+        {
+            printf("\nTem certeza que deseja sair do jogo? Todo seu progresso será apagado. Digite 1 para (Sair do Jogo) e 2 para (Voltar ao Jogo).\n\n");
+            scanf("%i", &opcao_saida);
+            if (opcao_saida == 1)
+            {
+                free(c);
+                cria_campo(c);
+                preenche_campo_minas(c);
+                contar_bombas_vizinhas(c);
+                fechar_campos(c);
+                menu(c);
+            }
+            else if (opcao_saida == 2)
+            {
+                printf("Ok! Voltando para o mesmo ponto do jogo...\n");
 
-    // if (coordenada_valida(linha_com_um - 1, coluna_com_um - 1) && c[2].matriz[linha_com_um - 1][coluna_com_um - 1] == '0' && (linha_com_um - 1) != linha_bomba && (coluna_com_um - 1) != coluna_bomba)
-    // {
-    //     printf("%d %d\n", linha_com_um - 1, coluna_com_um - 1);
-    //     abrir_coordenada(c, linha_com_um - 1, coluna_com_um - 1);
-    // }
-    // if (coordenada_valida(linha_com_um - 1, coluna_com_um + 1) && c[2].matriz[linha_com_um - 1][coluna_com_um + 1] == '0' && (linha_com_um - 1) != linha_bomba && (coluna_com_um + 1) != coluna_bomba)
-    // {
-    //     printf("%d %d\n", linha_com_um - 1, coluna_com_um + 1);
-    //     abrir_coordenada(c, linha_com_um - 1, coluna_com_um + 1);
-    // }
-    // if (coordenada_valida(linha_com_um + 1, coluna_com_um - 1) && c[2].matriz[linha_com_um + 1][coluna_com_um - 1] == '0' && (linha_com_um + 1) != linha_bomba && (coluna_com_um - 1) != coluna_bomba)
-    // {
-    //     printf("%d %d\n", linha_com_um + 1, coluna_com_um - 1);
-    //     abrir_coordenada(c, linha_com_um + 1, coluna_com_um - 1);
-    // }
-    // if (coordenada_valida(linha_com_um + 1, coluna_com_um + 1) && c[2].matriz[linha_com_um + 1][coluna_com_um + 1] == '0' && (linha_com_um + 1) != linha_bomba && (coluna_com_um + 1) != coluna_bomba)
-    // {
-    //     printf("%d %d\n", linha_com_um + 1, coluna_com_um + 1);
-    //     =abrir_coordenada(c, linha_com_um + 1, coluna_com_um + 1);
-    // }
-
+                exibir_campo(c);
+                modo_casual(c, ref_tempo_inicial);
+                // modo_casual(c,ref_tempo_inicial);
+            }
+            else
+            {
+                opcao_invalida(opcao_saida);
+            }
+        }
+    }
+    else if (opcao == 4)
+    {
+        // solicitar_ajuda(c);
+        identificar_campo_sem_bomba(c);
+        exibir_campo(c);
+        modo_casual(c, ref_tempo_inicial);
+    }
+    else
+    {
+        opcao_invalida(opcao);
+        exibir_campo(c);
+        modo_casual(c, ref_tempo_inicial);
+    }
 }
 
+// função que finaliza o jogo se o jogador encontrar
+// uma mina ou se ele abrir todos os campos sem minas.
 
+void menu(campo *c)
+{
+    int opcao;
+    printf("\nOlá! Seja bem-vindo(a) ao Campo Minado.\n\n Por favor, escolha uma opção de 1 a 3. \n 1 - Jogar: Modo Casual\n 2 - Modo Autônomo\n 3 - Sair.\n\n");
+    scanf("%i", &opcao);
+    if (opcao > 3 || opcao < 1)
+    {
+        opcao_invalida(opcao);
+        menu(c);
+    }
+    else
+    {
+        if (opcao == 1)
+        {
+            printf("\nVocê selecionou a opção (%i). Iniciando Modo Casual... \n\n", opcao);
+            time_t tempo;
+            struct tm *infoTempo;
+            time(&tempo);
+            infoTempo = localtime(&tempo);
+            float tempo_inicial = infoTempo->tm_sec + (infoTempo->tm_min * 60) + (infoTempo->tm_hour - 3) * 3600;
+            float *ref_tempo_inicial = &tempo_inicial;
+            exibir_campo(c);
+            modo_casual(c, ref_tempo_inicial);
+        }
+        else if (opcao == 2)
+        {
+            printf("\nVocê selecionou a opção (%i). Iniciando Modo Autônomo... \n\n", opcao);
+            modo_autonomo(c);
+        }
+        else if (opcao == 3)
+        {
+            int opcao_saida = 5;
+            while (opcao_saida < 1 || opcao_saida > 2)
+            {
+                printf("\nTem certeza que deseja sair do programa? Digite 1 para (Sair do Programa) e 2 para (Voltar ao Menu Inicial).\n\n");
+                scanf("%i", &opcao_saida);
+                if (opcao_saida == 1)
+                {
+                    printf("\nVocê selecionou a opção (%i). Encerrando programa... \n\n", opcao);
+                    exit(0);
+                }
+                else if (opcao_saida == 2)
+                {
+                    printf("Ok! Voltando ao Menu Inicial...\n");
+                    menu(c);
+                }
+                else
+                {
+                    opcao_invalida(opcao_saida);
+                }
+            }
+        }
+    }
+}
 
 int main()
 {
 
     setlocale(LC_ALL, "Portuguese");
     campo *c;
-    c = malloc(sizeof(campo) * 4);
+    c = malloc(sizeof(campo) * 5);
     cria_campo(c);
     preenche_campo_minas(c);
     contar_bombas_vizinhas(c);
