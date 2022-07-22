@@ -195,10 +195,14 @@ void exibir_campo(campo *c)
                 printf(" %c |", c[1].matriz[linha][coluna]);
             }
         }
+        printf(ANSI_COLOR_WHITE " %d", cont_linha);
+        printf(ANSI_COLOR_RESET "");
         printf("\n");
         printf("  ---------------------------------------------------------------------------------\n");
+        
         cont_linha++;
     }
+    printf(ANSI_COLOR_WHITE "    0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19 \n" ANSI_COLOR_RESET);
 }
 
 
@@ -357,7 +361,7 @@ void solicitar_ajuda(campo *c, int i)
     int g_p = -1;
     int repeticao = 0;
     int contador_campos_abertos = 0;
-    if (i <= 4)
+    if (i <= 6)
     {
 
         for (int linha = 0; linha < l_constante; linha++)
@@ -372,7 +376,7 @@ void solicitar_ajuda(campo *c, int i)
         }
         if (contador_campos_abertos >= 4)
         {
-            solicitar_ajuda(c, 5);
+            solicitar_ajuda(c, 7);
         }
         else
         {
@@ -395,7 +399,7 @@ void solicitar_ajuda(campo *c, int i)
         }
 
     }
-    else if (i > 4 && i <= 10)
+    else if (i > 6 && i <= 11)
     {
         identificar_campo_sem_bomba(c);
         int result = abrir_campos(c);
@@ -1012,7 +1016,7 @@ void menu(campo *c)
     printf("*                                                                     *\n");
     printf("*                            CAMPO MINADO                             *\n");
     printf("*                                                                     *\n");
-    printf("*                     por: Luiz Gustavo e Lucas                       *\n");
+    printf("*                        Alunos: Luiz e Lucas                         *\n");
     printf("*                                                                     *\n");
     printf("*                                                                     *\n");
     printf("*---------------------------------------------------------------------*\n");
@@ -1077,7 +1081,7 @@ void gera_arquivo(int jogadas)
 
     fclose(pont_arq);
 
-    fopen("tempofinal.txt", "w");
+    fopen("numero_de_jogadas.txt", "w");
 
     fprintf(pont_arq, "Quantidade de jogadas:\n");
     fprintf(pont_arq, "%d", jogadas + 1);
